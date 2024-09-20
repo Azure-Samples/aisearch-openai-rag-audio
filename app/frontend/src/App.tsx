@@ -1,6 +1,11 @@
 import { useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+
+import { Recorder } from "./recorder";
+
 import "./App.css";
+
+let audioRecorder: Recorder;
 
 function App() {
     const [recording, setRecording] = useState(false);
@@ -21,13 +26,34 @@ function App() {
         [ReadyState.UNINSTANTIATED]: "Uninstantiated"
     }[readyState];
 
-    const onTalk = () => {
-        setRecording(!recording);
+    function processAudioRecordingBuffer(buffer: Buffer) {
+        const uint8Array = new Uint8Array(buffer);
+        const regularArray = String.fromCharCode(...uint8Array);
+        const base64 = btoa(regularArray);
 
+        sendJsonMessage({
+            event: "add_user_audio",
+            data: base64
+        });
+    }
+
+    const onTalk = async () => {
         if (!recording) {
             sendJsonMessage({ event: "Start talking" });
+
+            audioRecorder = new Recorder(processAudioRecordingBuffer);
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioRecorder.start(stream);
+
+            setRecording(true);
         } else {
             sendJsonMessage({ event: "Stop talking" });
+
+            if (audioRecorder) {
+                audioRecorder.stop();
+            }
+
+            setRecording(false);
         }
     };
 
