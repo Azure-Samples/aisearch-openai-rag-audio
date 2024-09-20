@@ -1,11 +1,11 @@
 export class Recorder {
-    onDataAvailable: (buffer: Buffer) => void;
+    onDataAvailable: (buffer: Iterable<number>) => void;
     private audioContext: AudioContext | null = null;
     private mediaStream: MediaStream | null = null;
     private mediaStreamSource: MediaStreamAudioSourceNode | null = null;
     private workletNode: AudioWorkletNode | null = null;
 
-    public constructor(onDataAvailable: (buffer: Buffer) => void) {
+    public constructor(onDataAvailable: (buffer: Iterable<number>) => void) {
         this.onDataAvailable = onDataAvailable;
     }
 

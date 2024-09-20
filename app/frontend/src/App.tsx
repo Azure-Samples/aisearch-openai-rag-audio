@@ -35,7 +35,7 @@ function App() {
         buffer = newBuffer;
     }
 
-    function processAudioRecordingBuffer(data: Buffer) {
+    function processAudioRecordingBuffer(data: Iterable<number>) {
         const uint8Array = new Uint8Array(data);
         combineArray(uint8Array);
 
@@ -78,7 +78,7 @@ function App() {
             <h1>Talk to your data</h1>
             <div className="card">
                 <button className="button" onClick={onTalk}>
-                    {recording ? "Stop" : "Talk"}
+                    {recording ? "Stop" : "Start"}
                 </button>
                 <p className="note">{recording ? "Listening..." : "Press to start talking"}</p>
                 <p className="note">Websocket status: {connectionStatus}</p>

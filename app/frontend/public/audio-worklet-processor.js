@@ -1,4 +1,4 @@
-class AudioProcessor extends AudioWorkletProcessor {
+class PCMAudioProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
     }
@@ -24,4 +24,4 @@ class AudioProcessor extends AudioWorkletProcessor {
     }
 }
 
-registerProcessor("audio-worklet-processor", AudioProcessor);
+registerProcessor("audio-worklet-processor", PCMAudioProcessor);
