@@ -6,6 +6,8 @@ import { Recorder } from "./recorder";
 import "./App.css";
 
 let audioRecorder: Recorder;
+let buffer: Uint8Array = new Uint8Array();
+const BUFFER_SIZE = 4800;
 
 function App() {
     const [recording, setRecording] = useState(false);
@@ -26,15 +28,29 @@ function App() {
         [ReadyState.UNINSTANTIATED]: "Uninstantiated"
     }[readyState];
 
-    function processAudioRecordingBuffer(buffer: Buffer) {
-        const uint8Array = new Uint8Array(buffer);
-        const regularArray = String.fromCharCode(...uint8Array);
-        const base64 = btoa(regularArray);
+    function combineArray(newData: Uint8Array) {
+        const newBuffer = new Uint8Array(buffer.length + newData.length);
+        newBuffer.set(buffer);
+        newBuffer.set(newData, buffer.length);
+        buffer = newBuffer;
+    }
 
-        sendJsonMessage({
-            event: "add_user_audio",
-            data: base64
-        });
+    function processAudioRecordingBuffer(data: Buffer) {
+        const uint8Array = new Uint8Array(data);
+        combineArray(uint8Array);
+
+        if (buffer.length >= BUFFER_SIZE) {
+            const toSend = new Uint8Array(buffer.slice(0, BUFFER_SIZE));
+            buffer = new Uint8Array(buffer.slice(BUFFER_SIZE));
+
+            const regularArray = String.fromCharCode(...toSend);
+            const base64 = btoa(regularArray);
+
+            sendJsonMessage({
+                event: "add_user_audio",
+                data: base64
+            });
+        }
     }
 
     const onTalk = async () => {
