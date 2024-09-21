@@ -15,7 +15,7 @@ export class Player {
         }
     }
 
-    clear() {
+    stop() {
         if (this.playbackNode) {
             this.playbackNode.port.postMessage(null);
         }

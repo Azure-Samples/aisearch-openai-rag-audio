@@ -15,6 +15,7 @@ import { Settings } from "./types";
 import "./App.css";
 
 const BUFFER_SIZE = 4800;
+const SAMPLE_RATE = 24000;
 let buffer: Uint8Array = new Uint8Array();
 let audioRecorder: Recorder;
 let audioPlayer: Player;
@@ -74,13 +75,22 @@ function App() {
     const onTalk = async () => {
         if (!recording) {
             sendJsonMessage({
-                event: "Start talking",
+                event: "update_session_config",
+                turn_detection: "server_vad"
+            });
+
+            sendJsonMessage({
+                event: "update_conversation_config",
+                system_message: settings.systemPrompt,
                 temperature: settings.temperature,
-                systemPrompt: settings.systemPrompt,
                 voice: settings.voice
             });
 
             audioRecorder = new Recorder(processAudioRecordingBuffer);
+
+            audioPlayer = new Player();
+            audioPlayer.init(SAMPLE_RATE);
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             audioRecorder.start(stream);
 
@@ -90,6 +100,10 @@ function App() {
 
             if (audioRecorder) {
                 audioRecorder.stop();
+            }
+
+            if (audioPlayer) {
+                audioPlayer.stop();
             }
 
             setRecording(false);
