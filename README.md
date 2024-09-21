@@ -4,6 +4,11 @@
 1. Install the required tools:
    - [Node.js](https://nodejs.org/en)
 1. Clone the repo.
+1. **Temporary until backend is wired up**: in app/frontend/src/App.tsx replace
+   ```
+   const AOAI_ENDPOINT = "YOUR_INSTANCE_NAME.openai.azure.com";
+   const AOAI_KEY = "YOUR_API_KEY";
+   ```
 1. Run this command to start the app:
    ```
    cd app
