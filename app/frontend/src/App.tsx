@@ -14,6 +14,9 @@ import { Settings } from "./types";
 
 import "./App.css";
 
+const AOAI_ENDPOINT = "YOUR_INSTANCE_NAME.openai.azure.com";
+const AOAI_KEY = "YOUR_API_KEY";
+
 const BUFFER_SIZE = 4800;
 const SAMPLE_RATE = 24000;
 let buffer: Uint8Array = new Uint8Array();
@@ -31,12 +34,57 @@ function App() {
 
     const [recording, setRecording] = useState(false);
 
-    //Public API that will echo messages sent to it back to the client
-    const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket("wss://echo.websocket.org", {
+    const onMessageReceived = (event: MessageEvent<any>) => {
+        console.log("Websocket onMessage:", event);
+
+        const message = JSON.parse(event.data);
+
+        switch (message.event) {
+            case "start_session":
+                console.log("start_session");
+                break;
+            case "add_message":
+                console.log("add_message");
+                break;
+            case "add_content":
+                console.log("add_content");
+
+                if (message.type === "text") {
+                    console.log(message.data);
+                } else if (message.type === "audio") {
+                    const binary = atob(message.data);
+                    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+                    const pcmData = new Int16Array(bytes.buffer);
+                    audioPlayer.play(pcmData);
+                }
+
+                break;
+            case "input_transcribed":
+                console.log("input_transcribed");
+                break;
+            case "generation_canceled":
+                console.log("generation_canceled");
+                break;
+            case "generation_finished":
+                console.log("generation_finished");
+                break;
+            case "vad_speech_started":
+                console.log("vad_speech_started");
+                break;
+            case "vad_speech_stopped":
+                console.log("vad_speech_stopped");
+                break;
+            case "error":
+                console.log("error");
+                break;
+        }
+    };
+
+    const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(`wss://${AOAI_ENDPOINT}/realtime?api-key=${AOAI_KEY}&api-version=alpha`, {
         onOpen: () => console.log("Websocket connection opened"),
         onClose: () => console.log("Websocket connection closed"),
         onError: event => console.error("WebSocket error:", event),
-        onMessage: event => console.log("Websocket onMessage:", event)
+        onMessage: onMessageReceived
     });
 
     const connectionStatus = {
@@ -96,7 +144,7 @@ function App() {
 
             setRecording(true);
         } else {
-            sendJsonMessage({ event: "Stop talking" });
+            sendJsonMessage({ event: "Stop session" });
 
             if (audioRecorder) {
                 audioRecorder.stop();
