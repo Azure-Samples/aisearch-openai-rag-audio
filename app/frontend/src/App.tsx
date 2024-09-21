@@ -144,8 +144,6 @@ function App() {
 
             setRecording(true);
         } else {
-            sendJsonMessage({ event: "Stop session" });
-
             if (audioRecorder) {
                 audioRecorder.stop();
             }
