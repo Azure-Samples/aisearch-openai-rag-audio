@@ -14,8 +14,9 @@ import { Settings } from "./types";
 
 import "./App.css";
 
-const AOAI_ENDPOINT = "YOUR_INSTANCE_NAME.openai.azure.com";
-const AOAI_KEY = "YOUR_API_KEY";
+// Use "wss://YOUR_INSTANCE_NAME.openai.azure.com" to bypass the middle tier and go directly to the LLM endpoint
+const AOAI_ENDPOINT_OVERRIDE = null; 
+const AOAI_KEY = "none"; // Use a real key if bypassing the middle tier
 
 const BUFFER_SIZE = 4800;
 const SAMPLE_RATE = 24000;
@@ -80,7 +81,7 @@ function App() {
         }
     };
 
-    const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(`wss://${AOAI_ENDPOINT}/realtime?api-key=${AOAI_KEY}&api-version=alpha`, {
+    const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(`${AOAI_ENDPOINT_OVERRIDE ?? ""}/realtime?api-key=${AOAI_KEY}&api-version=alpha`, {
         onOpen: () => console.log("Websocket connection opened"),
         onClose: () => console.log("Websocket connection closed"),
         onError: event => console.error("WebSocket error:", event),
