@@ -1,11 +1,29 @@
 import aiohttp
 import asyncio
 import json
-from typing import Any, Optional
+from enum import Enum
+from typing import Any, Callable, Optional
 from aiohttp import web
 
+class ToolResultDirection(Enum):
+    TO_SERVER = 1
+    TO_CLIENT = 2
+
+class ToolResult:
+    text: str
+    destination: ToolResultDirection
+
+    def __init__(self, text: str, destination: ToolResultDirection):
+        self.text = text
+        self.destination = destination
+
+    def to_text(self) -> str:
+        if self.text is None:
+            return ""
+        return self.text if type(self.text) == str else json.dumps(self.text)
+
 class Tool:
-    target: Any
+    target: Callable[..., ToolResult]
     schema: Any
 
     def __init__(self, target: Any, schema: Any):
@@ -41,7 +59,7 @@ class RTMiddleTier:
         self.endpoint = endpoint
         self.key = key
 
-    async def _process_message(self, msg: str, server_ws: web.WebSocketResponse, to_client: bool) -> Optional[str]:
+    async def _process_message(self, msg: str, client_ws: web.WebSocketResponse, server_ws: web.WebSocketResponse, to_client: bool) -> Optional[str]:
         message = json.loads(msg.data)
         updated_message = msg.data
         if message is not None:
@@ -96,7 +114,7 @@ class RTMiddleTier:
                             tool = self.tools[tool_call.name]
                             result = await tool.target(json.loads(tool_call.arguments))
                             # TODO: validate with full spec for tool response
-                            await server_ws.send_str(json.dumps({
+                            await server_ws.send_json({
                                 "event": "add_message",
                                 "conversation_label": tool_call.conversation,
                                 "message": {
@@ -104,10 +122,29 @@ class RTMiddleTier:
                                     "tool_call_id": tool_call.tool_call_id,
                                     "content": [{
                                         "type": "text",
-                                        "text": result if type(result) == str else json.dumps(result)
+                                        "text": result.to_text() if result.destination == ToolResultDirection.TO_SERVER else ""
                                     }]
                                 }
-                            }))
+                            })
+                            if result.destination == ToolResultDirection.TO_CLIENT:
+                                new_id = "msg_" + tool_call.tool_call_id
+                                await client_ws.send_json({
+                                    "event": "add_content",
+                                    "conversation_label": tool_call.conversation,
+                                    "message": {
+                                        "id": new_id,
+                                        "role": "assistant",
+                                        "content": [{
+                                            "type": "text",
+                                            "text": result.to_text()
+                                        }]
+                                    }
+                                })
+                                await client_ws.send_json({
+                                    "event": "message_added",
+                                    "conversation_label": tool_call.conversation,
+                                    "id": new_id
+                                })
                             updated_message = None
 
                 case "generation_finished":
@@ -129,7 +166,7 @@ class RTMiddleTier:
                 async def from_client_to_server():
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
-                            new_msg = await self._process_message(msg, target_ws, to_client=False)
+                            new_msg = await self._process_message(msg, ws, target_ws, to_client=False)
                             if new_msg is not None:
                                 await target_ws.send_str(new_msg)
                         else:
@@ -138,7 +175,7 @@ class RTMiddleTier:
                 async def from_server_to_client():
                     async for msg in target_ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
-                            new_msg = await self._process_message(msg, target_ws, to_client=True)
+                            new_msg = await self._process_message(msg, ws, target_ws, to_client=True)
                             if new_msg is not None:
                                 await ws.send_str(new_msg)
                         else:
