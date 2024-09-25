@@ -4,6 +4,12 @@ type Message = {
     event: string;
     data: string;
     type?: "text" | "audio";
+    transcript?: string;
+    message?: {
+        content: {
+            text: string;
+        }[];
+    };
 };
 
 type Parameters = {
