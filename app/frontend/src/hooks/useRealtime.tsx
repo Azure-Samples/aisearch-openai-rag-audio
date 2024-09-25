@@ -1,16 +1,13 @@
 import useWebSocket from "react-use-websocket";
 
-type Message = {
-    event: string;
-    data: string;
-    type?: "text" | "audio";
-    transcript?: string;
-    message?: {
-        content: {
-            text: string;
-        }[];
-    };
-};
+import {
+    InputAudioBufferAppendCommand,
+    InputAudioBufferClearCommand,
+    Message,
+    ResponseAudioDelta,
+    ResponseAudioTranscriptDelta,
+    SessionUpdateCommand
+} from "@/types";
 
 type Parameters = {
     aoaiEndpointOverride?: string | null;
@@ -21,14 +18,32 @@ type Parameters = {
     onWebSocketError?: (event: Event) => void;
     onWebSocketMessage?: (event: MessageEvent<any>) => void;
 
-    onReceivedStartSession?: (message: Message) => void;
-    onReceivedAddMessage?: (message: Message) => void;
-    onReceivedAddContent?: (message: Message) => void;
-    onReceivedInputTranscribed?: (message: Message) => void;
-    onReceivedGenerationCanceled?: (message: Message) => void;
-    onReceivedGenerationFinished?: (message: Message) => void;
-    onReceivedVadSpeechStarted?: (message: Message) => void;
-    onReceivedVadSpeechStopped?: (message: Message) => void;
+    onReceivedSessionCreated?: (message: Message) => void;
+    onReceivedItemCreated?: (message: Message) => void;
+    onReceivedItemDeleted?: (message: Message) => void;
+    onReceivedItemTruncated?: (message: Message) => void;
+    onReceivedResponseCreated?: (message: Message) => void;
+    onReceivedResponseDone?: (message: Message) => void;
+    onReceivedResponseCancelled?: (message: Message) => void;
+    onReceivedRateLimitsUpdated?: (message: Message) => void;
+    onReceivedResponseOutputItemAdded?: (message: Message) => void;
+    onReceivedResponseOutputItemDone?: (message: Message) => void;
+    onReceivedResponseContentPartAdded?: (message: Message) => void;
+    onReceivedResponseContentPartDone?: (message: Message) => void;
+    onReceivedResponseAudioDelta?: (message: ResponseAudioDelta) => void;
+    onReceivedResponseAudioDone?: (message: Message) => void;
+    onReceivedResponseAudioTranscriptDelta?: (message: ResponseAudioTranscriptDelta) => void;
+    onReceivedResponseAudioTranscriptDone?: (message: Message) => void;
+    onReceivedResponseTextDelta?: (message: Message) => void;
+    onReceivedResponseTextDone?: (message: Message) => void;
+    onReceivedResponseFunctionCallArgumentsDelta?: (message: Message) => void;
+    onReceivedResponseFunctionCallArgumentsDone?: (message: Message) => void;
+    onReceivedInputAudioBufferSpeechStarted?: (message: Message) => void;
+    onReceivedInputAudioBufferSpeechStopped?: (message: Message) => void;
+    onReceivedItemInputAudioTranscriptionCompleted?: (message: Message) => void;
+    onReceivedItemInputAudioTranscriptionFailed?: (message: Message) => void;
+    onReceivedInputAudioBufferCommitted?: (message: Message) => void;
+    onReceivedInputAudioBufferCleared?: (message: Message) => void;
     onReceivedError?: (message: Message) => void;
 };
 
@@ -39,14 +54,32 @@ export default function useRealTime({
     onWebSocketClose,
     onWebSocketError,
     onWebSocketMessage,
-    onReceivedStartSession,
-    onReceivedAddMessage,
-    onReceivedAddContent,
-    onReceivedInputTranscribed,
-    onReceivedGenerationCanceled,
-    onReceivedGenerationFinished,
-    onReceivedVadSpeechStarted,
-    onReceivedVadSpeechStopped,
+    onReceivedSessionCreated,
+    onReceivedItemCreated,
+    onReceivedItemDeleted,
+    onReceivedItemTruncated,
+    onReceivedResponseCreated,
+    onReceivedResponseDone,
+    onReceivedResponseCancelled,
+    onReceivedRateLimitsUpdated,
+    onReceivedResponseOutputItemAdded,
+    onReceivedResponseOutputItemDone,
+    onReceivedResponseContentPartAdded,
+    onReceivedResponseContentPartDone,
+    onReceivedResponseAudioDelta,
+    onReceivedResponseAudioDone,
+    onReceivedResponseAudioTranscriptDelta,
+    onReceivedResponseAudioTranscriptDone,
+    onReceivedResponseTextDelta,
+    onReceivedResponseTextDone,
+    onReceivedResponseFunctionCallArgumentsDelta,
+    onReceivedResponseFunctionCallArgumentsDone,
+    onReceivedInputAudioBufferSpeechStarted,
+    onReceivedInputAudioBufferSpeechStopped,
+    onReceivedItemInputAudioTranscriptionCompleted,
+    onReceivedItemInputAudioTranscriptionFailed,
+    onReceivedInputAudioBufferCommitted,
+    onReceivedInputAudioBufferCleared,
     onReceivedError
 }: Parameters) {
     const { sendJsonMessage } = useWebSocket(`${aoaiEndpointOverride ?? ""}/realtime?api-key=${aoaiApiKey}&api-version=alpha`, {
@@ -56,30 +89,41 @@ export default function useRealTime({
         onMessage: event => onMessageReceived(event)
     });
 
+    // TODO: Remove? Start ws?
     const startSession = () => {
-        sendJsonMessage({
-            event: "update_session_config",
-            data: {
-                turn_detection: "server_vad"
+        const command: SessionUpdateCommand = {
+            type: "session.update",
+            session: {
+                turn_detection: {
+                    type: "server_vad"
+                }
             }
-        });
+        };
 
-        sendJsonMessage({
-            event: "update_conversation_config"
-        });
+        sendJsonMessage(command);
     };
 
     const addUserAudio = (base64Audio: string) => {
-        sendJsonMessage({
-            event: "add_user_audio",
-            data: base64Audio
-        });
+        const command: InputAudioBufferAppendCommand = {
+            type: "input_audio_buffer.append",
+            audio: base64Audio
+        };
+
+        sendJsonMessage(command);
+    };
+
+    const inputAudioBufferClear = () => {
+        const command: InputAudioBufferClearCommand = {
+            type: "input_audio_buffer.clear"
+        };
+
+        sendJsonMessage(command);
     };
 
     const onMessageReceived = (event: MessageEvent<any>) => {
         onWebSocketMessage?.(event);
 
-        let message;
+        let message: Message;
         try {
             message = JSON.parse(event.data);
         } catch (e) {
@@ -87,30 +131,84 @@ export default function useRealTime({
             throw e;
         }
 
-        switch (message.event) {
-            case "start_session":
-                onReceivedStartSession?.(message);
+        switch (message.type) {
+            case "session_created":
+                onReceivedSessionCreated?.(message);
                 break;
-            case "add_message":
-                onReceivedAddMessage?.(message);
+            case "item_created":
+                onReceivedItemCreated?.(message);
                 break;
-            case "add_content":
-                onReceivedAddContent?.(message);
+            case "item_deleted":
+                onReceivedItemDeleted?.(message);
                 break;
-            case "input_transcribed":
-                onReceivedInputTranscribed?.(message);
+            case "item_truncated":
+                onReceivedItemTruncated?.(message);
                 break;
-            case "generation_canceled":
-                onReceivedGenerationCanceled?.(message);
+            case "response_created":
+                onReceivedResponseCreated?.(message);
                 break;
-            case "generation_finished":
-                onReceivedGenerationFinished?.(message);
+            case "response_done":
+                onReceivedResponseDone?.(message);
                 break;
-            case "vad_speech_started":
-                onReceivedVadSpeechStarted?.(message);
+            case "response_cancelled":
+                onReceivedResponseCancelled?.(message);
                 break;
-            case "vad_speech_stopped":
-                onReceivedVadSpeechStopped?.(message);
+            case "rate_limits_updated":
+                onReceivedRateLimitsUpdated?.(message);
+                break;
+            case "response_output_item_added":
+                onReceivedResponseOutputItemAdded?.(message);
+                break;
+            case "response_output_item_done":
+                onReceivedResponseOutputItemDone?.(message);
+                break;
+            case "response_content_part_added":
+                onReceivedResponseContentPartAdded?.(message);
+                break;
+            case "response_content_part_done":
+                onReceivedResponseContentPartDone?.(message);
+                break;
+            case "response.audio.delta":
+                onReceivedResponseAudioDelta?.(message as ResponseAudioDelta);
+                break;
+            case "response.audio.done":
+                onReceivedResponseAudioDone?.(message);
+                break;
+            case "response.audio_transcript.delta":
+                onReceivedResponseAudioTranscriptDelta?.(message as ResponseAudioTranscriptDelta);
+                break;
+            case "response_audio_transcript_done":
+                onReceivedResponseAudioTranscriptDone?.(message);
+                break;
+            case "response_text_delta":
+                onReceivedResponseTextDelta?.(message);
+                break;
+            case "response_text_done":
+                onReceivedResponseTextDone?.(message);
+                break;
+            case "response_function_call_arguments_delta":
+                onReceivedResponseFunctionCallArgumentsDelta?.(message);
+                break;
+            case "response_function_call_arguments_done":
+                onReceivedResponseFunctionCallArgumentsDone?.(message);
+                break;
+            case "input_audio_buffer_speech_started":
+                onReceivedInputAudioBufferSpeechStarted?.(message);
+                break;
+            case "input_audio_buffer_speech_stopped":
+                onReceivedInputAudioBufferSpeechStopped?.(message);
+                break;
+            case "item_input_audio_transcription_completed":
+                onReceivedItemInputAudioTranscriptionCompleted?.(message);
+                break;
+            case "item_input_audio_transcription_failed":
+                onReceivedItemInputAudioTranscriptionFailed?.(message);
+                break;
+            case "input_audio_buffer_committed":
+                onReceivedInputAudioBufferCommitted?.(message);
+                break;
+            case "input_audio_buffer_cleared":
+                onReceivedInputAudioBufferCleared?.(message);
                 break;
             case "error":
                 onReceivedError?.(message);
@@ -118,5 +216,5 @@ export default function useRealTime({
         }
     };
 
-    return { startSession, addUserAudio };
+    return { startSession, addUserAudio, inputAudioBufferClear };
 }
