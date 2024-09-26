@@ -3,6 +3,9 @@
 ## Local development
 1. Install the required tools:
    - [Node.js](https://nodejs.org/en)
+   - [Python >=3.10](https://www.python.org/downloads/)
+      - **Important**: Python and the pip package manager must be in the path in Windows for the setup scripts to work.
+      - **Important**: Ensure you can run `python --version` from console. On Ubuntu, you might need to run `sudo apt install python-is-python3` to link `python` to `python3`.
 1. Clone the repo.
 1. Create `app/backend/.env` with:
    ```
