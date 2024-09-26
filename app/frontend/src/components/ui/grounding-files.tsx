@@ -4,8 +4,11 @@ import { File } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import { Button } from "./button";
 
+import { GroundingFile } from "@/types";
+
 type Properties = {
-    files: string[];
+    files: GroundingFile[];
+    onSelected: (file: GroundingFile) => void;
 };
 
 const variants: Variants = {
@@ -24,36 +27,37 @@ const variants: Variants = {
     })
 };
 
-export function GroundingFiles({ files }: Properties) {
+export function GroundingFiles({ files, onSelected }: Properties) {
+    if (files.length === 0) {
+        return null;
+    }
+
     return (
-        <Card className="max-w-xl md:max-w-md m-4">
+        <Card className="m-4 max-w-full md:max-w-md">
             <CardHeader>
-                <CardTitle>Grounding files</CardTitle>
+                <CardTitle className="text-xl">Grounding files</CardTitle>
                 <CardDescription>Files used to ground the last answer.</CardDescription>
             </CardHeader>
-            <CardContent className="">
-                {files.length === 0 && <p>No files</p>}
+            <CardContent>
                 <AnimatePresence>
-                    {files.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="h-full overflow-y-auto"
-                        >
-                            <div className="flex flex-wrap gap-2">
-                                {files.map((file, index) => (
-                                    <motion.div key={index} variants={variants} initial="hidden" animate="visible" custom={index}>
-                                        <Button variant="outline" size="sm" className="rounded-full">
-                                            <File className="w-4 h-4 mr-2" />
-                                            {file}
-                                        </Button>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="h-full overflow-y-auto"
+                    >
+                        <div className="flex flex-wrap gap-2">
+                            {files.map((file, index) => (
+                                <motion.div key={index} variants={variants} initial="hidden" animate="visible" custom={index}>
+                                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => onSelected(file)}>
+                                        <File className="mr-2 h-4 w-4" />
+                                        {file.name}
+                                    </Button>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
                 </AnimatePresence>
             </CardContent>
         </Card>

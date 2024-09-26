@@ -1,3 +1,9 @@
+export type GroundingFile = {
+    name: string;
+    content: string;
+    url: string;
+};
+
 export type SessionUpdateCommand = {
     type: "session.update";
     session: {
