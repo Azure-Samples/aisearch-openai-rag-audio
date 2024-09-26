@@ -39,13 +39,13 @@ function App() {
             stopAudioPlayer();
         },
         onReceivedResponseDone: message => {
-            if (message.response.output?.length === 0 || !message.response.output.some(x => x.content?.length > 0)) {
+            if (message.response.output?.length === 0 || !message.response.output.some(x => !!x.content?.length)) {
                 return;
             }
 
             setHistory(prev => [
                 ...prev,
-                ...message.response.output.flatMap(o => o.content.flatMap(c => ({ id: o.id, answer: c.transcript, groundingFiles: [] })))
+                ...message.response.output.flatMap(o => o.content?.flatMap(c => ({ id: o.id, answer: c.transcript, groundingFiles: [] })) ?? [])
             ]);
         }
     });
