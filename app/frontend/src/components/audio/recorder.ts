@@ -11,13 +11,18 @@ export class Recorder {
 
     async start(stream: MediaStream) {
         try {
+            if (this.audioContext) {
+                await this.audioContext.close();
+            }
+
             this.audioContext = new AudioContext({ sampleRate: 24000 });
-            await this.audioContext.audioWorklet.addModule("./audio-worklet-processor.js");
+
+            await this.audioContext.audioWorklet.addModule("./audio-processor-worklet.js");
 
             this.mediaStream = stream;
             this.mediaStreamSource = this.audioContext.createMediaStreamSource(this.mediaStream);
 
-            this.workletNode = new AudioWorkletNode(this.audioContext, "audio-worklet-processor");
+            this.workletNode = new AudioWorkletNode(this.audioContext, "audio-processor-worklet");
             this.workletNode.port.onmessage = event => {
                 this.onDataAvailable(event.data.buffer);
             };
@@ -29,13 +34,18 @@ export class Recorder {
         }
     }
 
-    stop() {
+    async stop() {
         if (this.mediaStream) {
             this.mediaStream.getTracks().forEach(track => track.stop());
+            this.mediaStream = null;
         }
 
         if (this.audioContext) {
-            this.audioContext.close();
+            await this.audioContext.close();
+            this.audioContext = null;
         }
+
+        this.mediaStreamSource = null;
+        this.workletNode = null;
     }
 }

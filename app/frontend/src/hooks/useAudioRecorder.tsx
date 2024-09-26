@@ -10,18 +10,18 @@ type Parameters = {
 export default function useAudioRecorder({ onAudioRecorded }: Parameters) {
     const audioRecorder = useRef<Recorder>();
 
-    let buffer: Uint8Array = new Uint8Array();
+    let buffer = new Uint8Array();
 
-    const combineArray = (newData: Uint8Array) => {
+    const appendToBuffer = (newData: Uint8Array) => {
         const newBuffer = new Uint8Array(buffer.length + newData.length);
         newBuffer.set(buffer);
         newBuffer.set(newData, buffer.length);
         buffer = newBuffer;
     };
 
-    const processAudioRecordingBuffer = (data: Iterable<number>) => {
+    const handleAudioData = (data: Iterable<number>) => {
         const uint8Array = new Uint8Array(data);
-        combineArray(uint8Array);
+        appendToBuffer(uint8Array);
 
         if (buffer.length >= BUFFER_SIZE) {
             const toSend = new Uint8Array(buffer.slice(0, BUFFER_SIZE));
@@ -35,13 +35,15 @@ export default function useAudioRecorder({ onAudioRecorded }: Parameters) {
     };
 
     const start = async () => {
-        audioRecorder.current = new Recorder(processAudioRecordingBuffer);
+        if (!audioRecorder.current) {
+            audioRecorder.current = new Recorder(handleAudioData);
+        }
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioRecorder.current.start(stream);
     };
 
-    const stop = () => {
-        audioRecorder.current?.stop();
+    const stop = async () => {
+        await audioRecorder.current?.stop();
     };
 
     return { start, stop };

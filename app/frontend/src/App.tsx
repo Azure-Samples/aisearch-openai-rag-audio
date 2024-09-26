@@ -57,12 +57,12 @@ function App() {
         if (!isRecording) {
             startSession();
 
-            startAudioRecording();
+            await startAudioRecording();
             resetAudioPlayer();
 
             setIsRecording(true);
         } else {
-            stopAudioRecording();
+            await stopAudioRecording();
             stopAudioPlayer();
             inputAudioBufferClear();
 
