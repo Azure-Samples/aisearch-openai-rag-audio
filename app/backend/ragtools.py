@@ -9,8 +9,8 @@ _search_tool_schema = {
     "type": "function",
     "name": "search",
     "description": "Search the knowledge base. The knowledge base is in English, translate to and from Engligh if " + \
-                    "needed. Results are formatted as a source name first in square brackets, followed by the text " + \
-                    "content, and a line with '-----' at the end of each result.",
+                   "needed. Results are formatted as a source name first in square brackets, followed by the text " + \
+                   "content, and a line with '-----' at the end of each result.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -50,7 +50,7 @@ async def _search_tool(search_client: SearchClient, args: Any) -> ToolResult:
     search_results = await search_client.search(
         search_text=args['query'], 
         query_type="semantic",
-        top=3,
+        top=5,
         vector_queries=[VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields="text_vector")])
     result = ""
     async for r in search_results:

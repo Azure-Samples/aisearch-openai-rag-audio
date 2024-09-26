@@ -31,11 +31,12 @@ class Tool:
         self.schema = schema
 
 class RTToolCall:
-    message_id: str
-    conversation: str
     tool_call_id: str
-    name: str
-    arguments: str
+    previous_id: str
+
+    def __init__(self, tool_call_id: str, previous_id: str):
+        self.tool_call_id = tool_call_id
+        self.previous_id = previous_id
 
 class RTMiddleTier:
     endpoint: str
@@ -53,7 +54,7 @@ class RTMiddleTier:
     max_tokens: Optional[int] = None
     disable_audio: Optional[bool] = None
 
-    _tools_pending = False
+    _tools_pending = {}
 
     def __init__(self, endpoint: str, key: str):
         self.endpoint = endpoint
@@ -80,14 +81,23 @@ class RTMiddleTier:
 
                 case "conversation.item.created":
                     if "item" in message and message["item"]["type"] == "function_call":
+                        item = message["item"]
+                        if item["call_id"] not in self._tools_pending:
+                            self._tools_pending[item["call_id"]] = RTToolCall(item["call_id"], message["previous_item_id"])
+                        updated_message = None
+                    elif "item" in message and message["item"]["type"] == "function_call_output":
                         updated_message = None
 
                 case "response.function_call_arguments.delta":
                     updated_message = None
                 
+                case "response.function_call_arguments.done":
+                    updated_message = None
+
                 case "response.output_item.done":
                     if "item" in message and message["item"]["type"] == "function_call":
                         item = message["item"]
+                        tool_call = self._tools_pending[message["item"]["call_id"]]
                         tool = self.tools[item["name"]]
                         args = item["arguments"]
                         result = await tool.target(json.loads(args))
@@ -104,18 +114,25 @@ class RTMiddleTier:
                             # this to be a regular text message with a special marker of some sort
                             await client_ws.send_json({
                                 "type": "extension.middle_tier_tool_response",
+                                "previous_item_id": tool_call.previous_id,
                                 "tool_name": item["name"],
                                 "tool_result": result.to_text()
                             })
-                        self._tools_pending = True
                         updated_message = None
 
                 case "response.done":
-                    if self._tools_pending:
-                        self._tools_pending = False
+                    if len(self._tools_pending) > 0:
+                        self._tools_pending.clear() # Any chance tool calls could be interleaved across different outstanding responses?
                         await server_ws.send_json({
                             "type": "response.create"
                         })
+                    if "response" in message:
+                        replace = False
+                        for i, output in enumerate(reversed(message["response"]["output"])):
+                            if output["type"] == "function_call":
+                                message["response"]["output"].pop(i)
+                                replace = True
+                        updated_message = json.dumps(message) if replace and len(message["response"]["output"]) > 0 else None                        
 
         return updated_message
 
