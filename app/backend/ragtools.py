@@ -7,44 +7,40 @@ from rtmt import RTMiddleTier, Tool, ToolResult, ToolResultDirection
 
 _search_tool_schema = {
     "type": "function",
-    "function": {
-        "name": "search",
-        "description": "Search the knowledge base. The knowledge base is in English, translate to and from Engligh if " + \
-                       "needed. Results are formatted as a source name first in square brackets, followed by the text " + \
-                       "content, and a line with '-----' at the end of each result.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query"
-                }
-            },
-            "required": ["query"],
-            "additionalProperties": False
+    "name": "search",
+    "description": "Search the knowledge base. The knowledge base is in English, translate to and from Engligh if " + \
+                    "needed. Results are formatted as a source name first in square brackets, followed by the text " + \
+                    "content, and a line with '-----' at the end of each result.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search query"
+            }
         },
+        "required": ["query"],
+        "additionalProperties": False
     }
 }
 
 _grounding_tool_schema = {
     "type": "function",
-    "function": {
-        "name": "report_grounding",
-        "description": "Report use of a source from the knowledge base as part of an answer",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "sources": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "List of source names from last statement actually used, do not include the ones not used to formulate a response"
-                }
-            },
-            "required": ["sources"],
-            "additionalProperties": False
+    "name": "report_grounding",
+    "description": "Report use of a source from the knowledge base as part of an answer",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "sources": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "List of source names from last statement actually used, do not include the ones not used to formulate a response"
+            }
         },
+        "required": ["sources"],
+        "additionalProperties": False
     }
 }
 

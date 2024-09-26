@@ -40,7 +40,7 @@ class RTToolCall:
 class RTMiddleTier:
     endpoint: str
     key: str
-
+    
     # Tools are server-side only for now, though the case could be made for client-side tools
     # in addition to server-side tools that are invisible to the client
     tools: dict[str, Tool] = {}
@@ -53,107 +53,91 @@ class RTMiddleTier:
     max_tokens: Optional[int] = None
     disable_audio: Optional[bool] = None
 
-    _tool_calls: dict[str, RTToolCall] = {}
+    _tools_pending = False
 
     def __init__(self, endpoint: str, key: str):
         self.endpoint = endpoint
         self.key = key
 
-    async def _process_message(self, msg: str, client_ws: web.WebSocketResponse, server_ws: web.WebSocketResponse, to_client: bool) -> Optional[str]:
+    async def _process_message_to_client(self, msg: str, client_ws: web.WebSocketResponse, server_ws: web.WebSocketResponse) -> Optional[str]:
         message = json.loads(msg.data)
         updated_message = msg.data
         if message is not None:
-            match message["event"]:
-                case "update_conversation_config":
-                    if not to_client:
-                        if self.system_message is not None:
-                            message["system_message"] = self.system_message
-                        if self.temperature is not None:
-                            message["temperature"] = self.temperature
-                        if self.max_tokens is not None:
-                            message["max_tokens"] = self.max_tokens
-                        if self.disable_audio is not None:
-                            message["disable_audio"] = self.disable_audio
-                        message["tool_choice"] = "auto" if len(self.tools) > 0 else "none"
-                        message["tools"] = [tool.schema for tool in self.tools.values()]
-                        updated_message = json.dumps(message)
+            match message["type"]:
+                case "session.created":
+                    session = message["session"]
+                    # Hide the instructions, tools and max tokens from clients, if we ever allow client-side 
+                    # tools, this will need updating
+                    session["instructions"] = ""
+                    session["tools"] = []
+                    session["tool_choice"] = "none"
+                    session["max_response_output_tokens"] = None
+                    updated_message = json.dumps(message)
 
-                case "add_message":
-                    if to_client:
-                        # Not sure if its possible for an add_message event to contain a mix of tools and non-tools calls,
-                        # accounting for it just in case
-                        remove_indexes = []
-                        for i, submsg in enumerate(message["message"]["content"]):
-                            if submsg["type"] == "tool_call":
-                                remove_indexes.append(i)
-                                tool_call: RTToolCall = RTToolCall()
-                                tool_call.message_id = message["message"]["id"]
-                                tool_call.conversation = message["conversation_label"]
-                                tool_call.name = submsg["name"]
-                                tool_call.tool_call_id = submsg["tool_call_id"]
-                                tool_call.arguments = submsg["arguments"]
-                                self._tool_calls[tool_call.message_id] = tool_call
-                        if len(remove_indexes) < len(message["message"]["content"]):
-                            for i in reversed(remove_indexes):
-                                message["message"]["content"].pop(i)
-                            updated_message = json.dumps(message)
-                        else:
-                            updated_message = None
-
-                case "add_content":
-                    if to_client and message["type"] == "tool_call":
-                        tool_call = self._tool_calls[message["message_id"]]
-                        tool_call.arguments += message["data"]
+                case "response.output_item.added":
+                    if "item" in message and message["item"]["type"] == "function_call":
                         updated_message = None
 
-                case "message_added":
-                    if to_client:
-                        tool_call = self._tool_calls.get(message["id"])
-                        if tool_call is not None:
-                            # TODO, validate which to use, message["content"][0]["arguments"] seems to have a repeat of the arguments
-                            tool = self.tools[tool_call.name]
-                            result = await tool.target(json.loads(tool_call.arguments))
-                            # TODO: validate with full spec for tool response
-                            await server_ws.send_json({
-                                "event": "add_message",
-                                "conversation_label": tool_call.conversation,
-                                "message": {
-                                    "role": "tool",
-                                    "tool_call_id": tool_call.tool_call_id,
-                                    "content": [{
-                                        "type": "text",
-                                        "text": result.to_text() if result.destination == ToolResultDirection.TO_SERVER else ""
-                                    }]
-                                }
-                            })
-                            if result.destination == ToolResultDirection.TO_CLIENT:
-                                new_id = "msg_" + tool_call.tool_call_id
-                                await client_ws.send_json({
-                                    "event": "add_content",
-                                    "conversation_label": tool_call.conversation,
-                                    "message": {
-                                        "id": new_id,
-                                        "role": "assistant",
-                                        "content": [{
-                                            "type": "text",
-                                            "text": result.to_text()
-                                        }]
-                                    }
-                                })
-                                await client_ws.send_json({
-                                    "event": "message_added",
-                                    "conversation_label": tool_call.conversation,
-                                    "id": new_id
-                                })
-                            updated_message = None
+                case "conversation.item.created":
+                    if "item" in message and message["item"]["type"] == "function_call":
+                        updated_message = None
 
-                case "generation_finished":
-                    if len(self._tool_calls) > 0:
-                        await server_ws.send_str(json.dumps({
-                            "event": "generate"
-                        }))
-                        self._tool_calls.clear()
-            
+                case "response.function_call_arguments.delta":
+                    updated_message = None
+                
+                case "response.output_item.done":
+                    if "item" in message and message["item"]["type"] == "function_call":
+                        item = message["item"]
+                        tool = self.tools[item["name"]]
+                        args = item["arguments"]
+                        result = await tool.target(json.loads(args))
+                        await server_ws.send_json({
+                            "type": "conversation.item.create",
+                            "item": {
+                                "type": "function_call_output",
+                                "call_id": item["call_id"],
+                                "output": result.to_text() if result.destination == ToolResultDirection.TO_SERVER else ""
+                            }
+                        })
+                        if result.destination == ToolResultDirection.TO_CLIENT:
+                            # TODO: this will break clients that don't know about this extra message, rewrite 
+                            # this to be a regular text message with a special marker of some sort
+                            await client_ws.send_json({
+                                "type": "extension.middle_tier_tool_response",
+                                "tool_name": item["name"],
+                                "tool_result": result.to_text()
+                            })
+                        self._tools_pending = True
+                        updated_message = None
+
+                case "response.done":
+                    if self._tools_pending:
+                        self._tools_pending = False
+                        await server_ws.send_json({
+                            "type": "response.create"
+                        })
+
+        return updated_message
+
+    async def _process_message_to_server(self, msg: str, ws: web.WebSocketResponse) -> Optional[str]:
+        message = json.loads(msg.data)
+        updated_message = msg.data
+        if message is not None:
+            match message["type"]:
+                case "session.update":
+                    session = message["session"]
+                    if self.system_message is not None:
+                        session["instructions"] = self.system_message
+                    if self.temperature is not None:
+                        session["temperature"] = self.temperature
+                    if self.max_tokens is not None:
+                        session["max_response_output_tokens"] = self.max_tokens
+                    if self.disable_audio is not None:
+                        session["disable_audio"] = self.disable_audio
+                    session["tool_choice"] = "auto" if len(self.tools) > 0 else "none"
+                    session["tools"] = [tool.schema for tool in self.tools.values()]
+                    updated_message = json.dumps(message)
+
         return updated_message
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
@@ -166,7 +150,7 @@ class RTMiddleTier:
                 async def from_client_to_server():
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
-                            new_msg = await self._process_message(msg, ws, target_ws, to_client=False)
+                            new_msg = await self._process_message_to_server(msg, ws)
                             if new_msg is not None:
                                 await target_ws.send_str(new_msg)
                         else:
@@ -175,7 +159,7 @@ class RTMiddleTier:
                 async def from_server_to_client():
                     async for msg in target_ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
-                            new_msg = await self._process_message(msg, ws, target_ws, to_client=True)
+                            new_msg = await self._process_message_to_client(msg, ws, target_ws)
                             if new_msg is not None:
                                 await ws.send_str(new_msg)
                         else:
