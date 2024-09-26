@@ -18,7 +18,6 @@ const AOAI_KEY = "none"; // Use a real key if bypassing the middle tier
 
 function App() {
     const [isRecording, setIsRecording] = useState(false);
-    // const [transcript, setTranscript] = useState<string[]>([]);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
 
@@ -31,35 +30,21 @@ function App() {
         onWebSocketOpen: () => console.log("WebSocket connection opened"),
         onWebSocketClose: () => console.log("WebSocket connection closed"),
         onWebSocketError: event => console.error("WebSocket error:", event),
-        onWebSocketMessage: event => console.log("WebSocket message:", event),
-
+        onWebSocketMessage: event => console.log("WebSocket message:", event.data),
+        onReceivedError: message => console.error("error", message),
         onReceivedResponseAudioDelta: message => {
             playAudio(message.delta);
         },
-        onReceivedResponseAudioTranscriptDelta: message => {
-            console.log(message.delta);
-            // setTranscript(log => [...log, message.delta]);
-        },
-        onReceivedResponseAudioTranscriptDone: () => {
-            // setTranscript(log => [...log, "\n"]);
-        },
+        onReceivedResponseDone: message => {
+            if (message.response.output?.length === 0 || !message.response.output.some(x => x.content?.length > 0)) {
+                return;
+            }
 
-        // onReceivedAddContent: message => {
-        //     if (message.type === "text") {
-        //         console.log(message.data);
-        //         setLog(log => [...log, message.data]);
-        //     } else if (message.type === "audio") {
-        //         playAudio(message.data);
-        //     } else if (!message.type && message.message?.content) {
-        //         const fileNames = message.message.content.flatMap(item => {
-        //             const match = /\*\*\*grounding:(\S+)/.exec(item.text);
-        //             return match ? [match[1]] : [];
-        //         });
-
-        //         setRagFiles(prev => [...prev, ...fileNames]);
-        //     }
-        // },
-        onReceivedError: message => console.error("error", message)
+            setHistory(prev => [
+                ...prev,
+                ...message.response.output.flatMap(o => o.content.flatMap(c => ({ id: o.id, answer: c.transcript, groundingFiles: [] })))
+            ]);
+        }
     });
 
     const { reset: resetAudioPlayer, play: playAudio, stop: stopAudioPlayer } = useAudioPlayer();
@@ -81,7 +66,6 @@ function App() {
             setIsRecording(false);
 
             setTimeout(() => {
-                // setTranscript(["Hi", " !", "this", "\n", "is", "a", "test", "rrrandomg randomg randomg randomg rhiajisd"]);
                 setGroundingFiles([
                     {
                         name: "fake-search-regions.md",
@@ -91,28 +75,7 @@ function App() {
                     { name: "fake-search-skus.md", content: "", url: "" },
                     { name: "fake-search-documentation-large.md", content: "", url: "" }
                 ]);
-
-                setHistory(prev => [
-                    ...prev,
-                    {
-                        question: "What is the capital of France?",
-                        answer: "Paris",
-                        groundingFiles: [
-                            {
-                                name: "fake-search-regions.md",
-                                content: "This is a random piece of text that takes more than two lines in the popup for testing purposes.",
-                                url: ""
-                            },
-                            { name: "fake-search-skus.md", content: "", url: "" }
-                        ]
-                    },
-                    {
-                        question: "What is the capital of France?",
-                        answer: "Paris",
-                        groundingFiles: []
-                    }
-                ]);
-            }, 1000);
+            }, 500);
         }
     };
 

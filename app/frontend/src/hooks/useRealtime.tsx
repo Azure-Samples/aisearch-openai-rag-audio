@@ -6,6 +6,7 @@ import {
     Message,
     ResponseAudioDelta,
     ResponseAudioTranscriptDelta,
+    ResponseDone,
     SessionUpdateCommand
 } from "@/types";
 
@@ -23,7 +24,7 @@ type Parameters = {
     onReceivedItemDeleted?: (message: Message) => void;
     onReceivedItemTruncated?: (message: Message) => void;
     onReceivedResponseCreated?: (message: Message) => void;
-    onReceivedResponseDone?: (message: Message) => void;
+    onReceivedResponseDone?: (message: ResponseDone) => void;
     onReceivedResponseCancelled?: (message: Message) => void;
     onReceivedRateLimitsUpdated?: (message: Message) => void;
     onReceivedResponseOutputItemAdded?: (message: Message) => void;
@@ -147,8 +148,8 @@ export default function useRealTime({
             case "response_created":
                 onReceivedResponseCreated?.(message);
                 break;
-            case "response_done":
-                onReceivedResponseDone?.(message);
+            case "response.done":
+                onReceivedResponseDone?.(message as ResponseDone);
                 break;
             case "response_cancelled":
                 onReceivedResponseCancelled?.(message);

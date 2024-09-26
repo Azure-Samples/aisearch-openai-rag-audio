@@ -34,7 +34,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                         {history.length > 0 ? (
                             history.map((item, index) => (
                                 <div key={index} className="mb-6 border-b border-gray-200 pb-6">
-                                    <h3 className="mb-2 font-semibold">Q: {item.question}</h3>
+                                    <h3 className="mb-2 font-semibold">{item.id}</h3>
                                     <pre className="mb-2 overflow-x-auto whitespace-pre-wrap rounded-md bg-gray-100 p-3 text-sm">
                                         <code className="block h-24 overflow-y-auto">{item.answer}</code>
                                     </pre>
