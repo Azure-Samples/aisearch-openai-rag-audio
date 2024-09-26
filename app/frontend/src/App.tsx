@@ -33,7 +33,10 @@ function App() {
         onWebSocketMessage: event => console.log("WebSocket message:", event.data),
         onReceivedError: message => console.error("error", message),
         onReceivedResponseAudioDelta: message => {
-            playAudio(message.delta);
+            isRecording && playAudio(message.delta);
+        },
+        onReceivedInputAudioBufferSpeechStarted: () => {
+            stopAudioPlayer();
         },
         onReceivedResponseDone: message => {
             if (message.response.output?.length === 0 || !message.response.output.some(x => x.content?.length > 0)) {

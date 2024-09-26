@@ -193,7 +193,7 @@ export default function useRealTime({
             case "response_function_call_arguments_done":
                 onReceivedResponseFunctionCallArgumentsDone?.(message);
                 break;
-            case "input_audio_buffer_speech_started":
+            case "input_audio_buffer.speech_started":
                 onReceivedInputAudioBufferSpeechStarted?.(message);
                 break;
             case "input_audio_buffer_speech_stopped":
