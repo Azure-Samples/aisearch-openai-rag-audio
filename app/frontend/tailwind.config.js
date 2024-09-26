@@ -50,6 +50,11 @@ export default {
                     4: "hsl(var(--chart-4))",
                     5: "hsl(var(--chart-5))"
                 }
+            },
+            fontSize: {
+                "7xl": ["4.5rem", { lineHeight: "1.3" }],
+                "4xl": ["2.5rem", { lineHeight: "3.2rem" }],
+                "3xl": ["2rem", { lineHeight: "2.3rem" }]
             }
         }
     },
