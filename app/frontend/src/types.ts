@@ -47,6 +47,6 @@ export type ResponseDone = {
     event_id: string;
     response: {
         id: string;
-        output: { id: string; content: { transcript: string; type: string }[] }[];
+        output: { id: string; content?: { transcript: string; type: string }[] }[];
     };
 };
