@@ -54,7 +54,7 @@ export default {
             fontSize: {
                 "7xl": ["4.5rem", { lineHeight: "1.3" }],
                 "4xl": ["2.5rem", { lineHeight: "3.2rem" }],
-                "3xl": ["2rem", { lineHeight: "2.3rem" }]
+                "3xl": ["2rem", { lineHeight: "2.8rem" }]
             }
         }
     },

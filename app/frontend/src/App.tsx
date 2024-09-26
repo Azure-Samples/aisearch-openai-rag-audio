@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, StopCircle } from "lucide-react";
+import { Mic, Square } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
@@ -88,17 +88,17 @@ function App() {
                 <div className="flex justify-center mb-4">
                     <Button
                         onClick={onToggleListening}
-                        className={`w-full md:w-auto ${isRecording ? "bg-red-500 hover:bg-red-600 " : "bg-purple-500 hover:bg-purple-600"}`}
+                        className={`w-full md:w-auto lg:w-60 lg:h-12 ${isRecording ? "bg-red-500 hover:bg-red-600 " : "bg-purple-500 hover:bg-purple-600"}`}
+                        aria-label={isRecording ? "Stop recording" : "Start recording"}
                     >
                         {isRecording ? (
                             <>
-                                <StopCircle className="w-5 h-5 mr-2" />
-                                Stop listening
+                                <Square className="w-6 h-6 mr-2" />
+                                Stop
                             </>
                         ) : (
                             <>
-                                <Mic className="w-5 h-5 mr-2" />
-                                Start listening
+                                <Mic className="w-6 h-6 mr-2" />
                             </>
                         )}
                     </Button>
