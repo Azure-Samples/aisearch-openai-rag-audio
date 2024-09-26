@@ -38,14 +38,6 @@ export default function GroundingFileView({ groundingFile, onClosed }: Propertie
                                 <code>{groundingFile.content}</code>
                             </pre>
                         </div>
-                        <div className="mt-4 flex justify-between">
-                            <Button variant="outline" onClick={() => window.open(groundingFile.url, "_blank")}>
-                                Open in new tab
-                            </Button>
-                            <Button variant="secondary" onClick={() => onClosed()}>
-                                Close
-                            </Button>
-                        </div>
                     </motion.div>
                 </motion.div>
             )}

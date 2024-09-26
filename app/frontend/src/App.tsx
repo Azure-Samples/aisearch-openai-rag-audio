@@ -10,11 +10,13 @@ import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
 import useAudioPlayer from "@/hooks/useAudioPlayer";
 
-import { GroundingFile, HistoryItem } from "./types";
+import { GroundingFile, HistoryItem, ToolResult } from "./types";
 
 // Use "wss://YOUR_INSTANCE_NAME.openai.azure.com" to bypass the middle tier and go directly to the LLM endpoint
 const AOAI_ENDPOINT_OVERRIDE = null;
 const AOAI_KEY = "none"; // Use a real key if bypassing the middle tier
+
+const HISTORY_ENABLED = false;
 
 function App() {
     const [isRecording, setIsRecording] = useState(false);
@@ -30,7 +32,6 @@ function App() {
         onWebSocketOpen: () => console.log("WebSocket connection opened"),
         onWebSocketClose: () => console.log("WebSocket connection closed"),
         onWebSocketError: event => console.error("WebSocket error:", event),
-        onWebSocketMessage: event => console.log("WebSocket message:", event.data),
         onReceivedError: message => console.error("error", message),
         onReceivedResponseAudioDelta: message => {
             isRecording && playAudio(message.delta);
@@ -39,14 +40,25 @@ function App() {
             stopAudioPlayer();
         },
         onReceivedResponseDone: message => {
-            if (message.response.output?.length === 0 || !message.response.output.some(x => !!x.content?.length)) {
+            if (!HISTORY_ENABLED || message.response.output?.length === 0 || !message.response.output.some(x => !!x.content?.length)) {
                 return;
             }
 
             setHistory(prev => [
                 ...prev,
-                ...message.response.output.flatMap(o => o.content?.flatMap(c => ({ id: o.id, answer: c.transcript, groundingFiles: [] })) ?? [])
+                ...message.response.output.flatMap(o => o.content?.flatMap(c => ({ id: o.id, transcript: c.transcript, groundingFiles: [] })) ?? [])
             ]);
+        },
+        onReceivedExtensionMiddleTierToolResponse: message => {
+            const result: ToolResult = JSON.parse(message.tool_result);
+
+            const files: GroundingFile[] = result.sources.map(x => {
+                const match = x.chunk_id.match(/_pages_(\d+)$/);
+                const name = match ? `${x.title}#page=${match[1]}` : x.title;
+                return { id: x.chunk_id, name: name, content: x.chunk };
+            });
+
+            setGroundingFiles(prev => [...prev, ...files]);
         }
     });
 
@@ -56,7 +68,6 @@ function App() {
     const onToggleListening = async () => {
         if (!isRecording) {
             startSession();
-
             await startAudioRecording();
             resetAudioPlayer();
 
@@ -67,18 +78,6 @@ function App() {
             inputAudioBufferClear();
 
             setIsRecording(false);
-
-            setTimeout(() => {
-                setGroundingFiles([
-                    {
-                        name: "fake-search-regions.md",
-                        content: "This is a random piece of text that takes more than two lines in the popup for testing purposes.",
-                        url: ""
-                    },
-                    { name: "fake-search-skus.md", content: "", url: "" },
-                    { name: "fake-search-documentation-large.md", content: "", url: "" }
-                ]);
-            }, 500);
         }
     };
 
@@ -107,7 +106,7 @@ function App() {
                     </Button>
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
-                {history.length > 0 && (
+                {HISTORY_ENABLED && history.length > 0 && (
                     <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="rounded-full">
                         <History className="mr-2 h-4 w-4" />
                         Show history

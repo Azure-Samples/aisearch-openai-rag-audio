@@ -36,7 +36,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                                 <div key={index} className="mb-6 border-b border-gray-200 pb-6">
                                     <h3 className="mb-2 font-semibold">{item.id}</h3>
                                     <pre className="mb-2 overflow-x-auto whitespace-pre-wrap rounded-md bg-gray-100 p-3 text-sm">
-                                        <code className="block h-24 overflow-y-auto">{item.answer}</code>
+                                        <code className="block h-24 overflow-y-auto">{item.transcript}</code>
                                     </pre>
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {item.groundingFiles.map((file, index) => (

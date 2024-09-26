@@ -4,6 +4,7 @@ import { GroundingFile as GroundingFileType } from "@/types";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import GroundingFile from "./grounding-file";
+import { useRef } from "react";
 
 type Properties = {
     files: GroundingFileType[];
@@ -31,8 +32,10 @@ export function GroundingFiles({ files, onSelected }: Properties) {
         return null;
     }
 
+    const isAnimating = useRef(false);
+
     return (
-        <Card className="m-4 max-w-full md:max-w-md">
+        <Card className="m-4 max-w-full md:max-w-md lg:min-w-96 lg:max-w-2xl">
             <CardHeader>
                 <CardTitle className="text-xl">Grounding files</CardTitle>
                 <CardDescription>Files used to ground the last answer.</CardDescription>
@@ -44,7 +47,9 @@ export function GroundingFiles({ files, onSelected }: Properties) {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="h-full overflow-y-auto"
+                        className={`h-full ${isAnimating ? "overflow-hidden" : "overflow-y-auto"}`}
+                        onLayoutAnimationStart={() => (isAnimating.current = true)}
+                        onLayoutAnimationComplete={() => (isAnimating.current = false)}
                     >
                         <div className="flex flex-wrap gap-2">
                             {files.map((file, index) => (
