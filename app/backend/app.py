@@ -15,10 +15,10 @@ if __name__ == "__main__":
     app = web.Application()
 
     rtmt = RTMiddleTier(llm_endpoint, llm_key)
-    rtmt.system_message = "You are a helpful assistant. Respond with short and concise answers. Always use the 'search' " + \
-                          "tool to check the knowledge base before answering a question. Always use the 'report_grounding' " + \
-                          "tool to report the source of information from the knowledge base. " + \
-                          "If the answer isn't in the knowledge base, say you don't know. "
+    rtmt.system_message = "You are a helpful assistant. Use the following step-by-step instructions to respond with short and concise answers using a knowledge base: " + \
+                          "Step 1 - Always use the 'search' tool to check the knowledge base before answering a question. " + \
+                          "Step 2 - Always use the 'report_grounding' tool to report the source of information from the knowledge base. " + \
+                          "Step 3 - If the answer isn't in the knowledge base, say you don't know."
     attach_rag_tools(rtmt, search_endpoint, search_index, search_key)
 
     rtmt.attach_to_app(app, "/realtime")
