@@ -4,6 +4,12 @@ export type GroundingFile = {
     url: string;
 };
 
+export type HistoryItem = {
+    question: string;
+    answer: string;
+    groundingFiles: GroundingFile[];
+};
+
 export type SessionUpdateCommand = {
     type: "session.update";
     session: {

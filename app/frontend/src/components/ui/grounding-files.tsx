@@ -1,14 +1,13 @@
 import { AnimatePresence, motion, Variants } from "framer-motion";
-import { File } from "lucide-react";
+
+import { GroundingFile as GroundingFileType } from "@/types";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
-import { Button } from "./button";
-
-import { GroundingFile } from "@/types";
+import GroundingFile from "./grounding-file";
 
 type Properties = {
-    files: GroundingFile[];
-    onSelected: (file: GroundingFile) => void;
+    files: GroundingFileType[];
+    onSelected: (file: GroundingFileType) => void;
 };
 
 const variants: Variants = {
@@ -50,10 +49,7 @@ export function GroundingFiles({ files, onSelected }: Properties) {
                         <div className="flex flex-wrap gap-2">
                             {files.map((file, index) => (
                                 <motion.div key={index} variants={variants} initial="hidden" animate="visible" custom={index}>
-                                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => onSelected(file)}>
-                                        <File className="mr-2 h-4 w-4" />
-                                        {file.name}
-                                    </Button>
+                                    <GroundingFile key={index} value={file} onClick={() => onSelected(file)} />
                                 </motion.div>
                             ))}
                         </div>

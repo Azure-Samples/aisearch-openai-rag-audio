@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Mic, Square } from "lucide-react";
+import { Mic, Square, History } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
+import GroundingFileView from "@/components/ui/grounding-file-view";
+import HistoryPanel from "@/components/ui/history-panel";
 
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
 import useAudioPlayer from "@/hooks/useAudioPlayer";
 
-import { GroundingFile } from "./types";
-import GroundingFileView from "./components/ui/grounding-file-view";
+import { GroundingFile, HistoryItem } from "./types";
 
 // Use "wss://YOUR_INSTANCE_NAME.openai.azure.com" to bypass the middle tier and go directly to the LLM endpoint
 const AOAI_ENDPOINT_OVERRIDE = null;
@@ -20,6 +21,9 @@ function App() {
     // const [transcript, setTranscript] = useState<string[]>([]);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
+
+    const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
 
     const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
         aoaiEndpointOverride: AOAI_ENDPOINT_OVERRIDE,
@@ -87,6 +91,27 @@ function App() {
                     { name: "fake-search-skus.md", content: "", url: "" },
                     { name: "fake-search-documentation-large.md", content: "", url: "" }
                 ]);
+
+                setHistory(prev => [
+                    ...prev,
+                    {
+                        question: "What is the capital of France?",
+                        answer: "Paris",
+                        groundingFiles: [
+                            {
+                                name: "fake-search-regions.md",
+                                content: "This is a random piece of text that takes more than two lines in the popup for testing purposes.",
+                                url: ""
+                            },
+                            { name: "fake-search-skus.md", content: "", url: "" }
+                        ]
+                    },
+                    {
+                        question: "What is the capital of France?",
+                        answer: "Paris",
+                        groundingFiles: []
+                    }
+                ]);
             }, 1000);
         }
     };
@@ -116,6 +141,12 @@ function App() {
                     </Button>
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
+                {history.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="rounded-full">
+                        <History className="mr-2 h-4 w-4" />
+                        Show history
+                    </Button>
+                )}
             </main>
 
             <footer className="py-4 text-center text-gray-400">
@@ -123,6 +154,7 @@ function App() {
             </footer>
 
             <GroundingFileView groundingFile={selectedFile} onClosed={() => setSelectedFile(null)} />
+            <HistoryPanel history={history} show={showHistory} onClosed={() => setShowHistory(false)} onSelectedGroundingFile={file => setSelectedFile(file)} />
         </div>
     );
 }
