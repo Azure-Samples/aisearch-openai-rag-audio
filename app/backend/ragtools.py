@@ -1,3 +1,4 @@
+import json
 from typing import Any, Optional
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
@@ -27,7 +28,9 @@ _search_tool_schema = {
 _grounding_tool_schema = {
     "type": "function",
     "name": "report_grounding",
-    "description": "Report use of a source from the knowledge base as part of an answer",
+    "description": "Report use of a source from the knowledge base as part of an answer (effectively, cite the source). Sources " + \
+                   "appear in square brackets before each knowledge base passage. Always use this tool to cite sources when responding " + \
+                   "with information from the knowledge base.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -51,16 +54,23 @@ async def _search_tool(search_client: SearchClient, args: Any) -> ToolResult:
         search_text=args['query'], 
         query_type="semantic",
         top=5,
-        vector_queries=[VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields="text_vector")])
+        vector_queries=[VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields="text_vector")],
+        select="chunk_id,title,chunk")
     result = ""
     async for r in search_results:
-        result += f"[{r['title']}]: {r['chunk']}\n-----\n"
+        result += f"[{r['chunk_id']}]: {r['chunk']}\n-----\n"
     return ToolResult(result, ToolResultDirection.TO_SERVER)
 
-async def _report_grounding_tool(args: Any) -> None:
+# TODO: move from sending all chunks used for grounding eagerly to only sending links to 
+# the original content in storage, it'll be more efficient overall
+async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None:
     list = ",".join(args["sources"])
     print(f"Grounding source: {list}")
-    return ToolResult(f"***grounding:{list}", ToolResultDirection.TO_CLIENT)
+    search_results = await search_client.search(filter=f"search.in(chunk_id, '{list}')", select="chunk_id,title,chunk")
+    docs = []
+    async for r in search_results:
+        docs.append({"chunk_id": r['chunk_id'], "title": r["title"], "chunk": r['chunk']})
+    return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
 def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str, search_key: Optional[str]) -> None:
     if search_key is None:
@@ -70,5 +80,5 @@ def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str
         search_creds = AzureKeyCredential(search_key)
     search_client = SearchClient(search_endpoint, search_index, search_creds)
 
-    rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda q: _search_tool(search_client, q))
-    rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=_report_grounding_tool)
+    rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, args))
+    rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, args))
