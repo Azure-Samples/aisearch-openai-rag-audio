@@ -132,7 +132,8 @@ class RTMiddleTier:
                             if output["type"] == "function_call":
                                 message["response"]["output"].pop(i)
                                 replace = True
-                        updated_message = json.dumps(message) if replace and len(message["response"]["output"]) > 0 else None                        
+                        if replace:
+                            updated_message = json.dumps(message)                        
 
         return updated_message
 
