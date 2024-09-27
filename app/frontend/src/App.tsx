@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Mic, Square, History } from "lucide-react";
+import { Mic, History, MicOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
@@ -84,10 +85,10 @@ function App() {
     return (
         <div className="flex min-h-screen flex-col bg-gray-100 text-gray-900">
             <main className="flex flex-grow flex-col items-center justify-center">
-                <h1 className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent lg:text-7xl">
+                <h1 className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent md:text-7xl">
                     Talk to your data
                 </h1>
-                <div className="mb-4 flex justify-center">
+                <div className="mb-4 flex flex-col items-center justify-center">
                     <Button
                         onClick={onToggleListening}
                         className={`h-12 w-60 ${isRecording ? "bg-red-500 hover:bg-red-600" : "bg-purple-500 hover:bg-purple-600"}`}
@@ -95,8 +96,8 @@ function App() {
                     >
                         {isRecording ? (
                             <>
-                                <Square className="mr-2 h-6 w-6" />
-                                Stop
+                                <MicOff className="mr-2 h-4 w-4" />
+                                Stop conversation
                             </>
                         ) : (
                             <>
@@ -104,6 +105,18 @@ function App() {
                             </>
                         )}
                     </Button>
+                    {isRecording ? (
+                        <div className="flex items-center">
+                            <motion.div
+                                animate={{ opacity: [1, 0.5, 1] }}
+                                transition={{ repeat: Infinity, duration: 1 }}
+                                className="mr-2 h-3 w-3 rounded-full bg-red-500"
+                            />
+                            <p className="text mb-4 mt-4 text-gray-500">Conversation in progress...</p>
+                        </div>
+                    ) : (
+                        <p className="text mb-4 mt-4 text-gray-500">Ask anything about your knowledge base</p>
+                    )}
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
                 {HISTORY_ENABLED && history.length > 0 && (
