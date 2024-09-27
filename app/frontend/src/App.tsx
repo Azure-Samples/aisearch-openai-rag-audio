@@ -115,7 +115,7 @@ function App() {
                             <p className="text mb-4 mt-6 text-gray-500">Conversation in progress...</p>
                         </div>
                     ) : (
-                        <p className="text mb-4 mt-6 text-gray-500">Ask anything about your knowledge base</p>
+                        <p className="text mb-4 mt-6 text-gray-500">Ask anything about Contoso employee benefits</p>
                     )}
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
@@ -128,7 +128,7 @@ function App() {
             </main>
 
             <footer className="py-4 text-center text-gray-400">
-                <p>Powered by AI Search + Azure OpenAI</p>
+                <p>Powered by Azure AI Search + Azure OpenAI</p>
             </footer>
 
             <GroundingFileView groundingFile={selectedFile} onClosed={() => setSelectedFile(null)} />
