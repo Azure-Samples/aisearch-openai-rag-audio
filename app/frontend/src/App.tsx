@@ -110,12 +110,12 @@ function App() {
                             <motion.div
                                 animate={{ opacity: [1, 0.5, 1] }}
                                 transition={{ repeat: Infinity, duration: 1 }}
-                                className="mr-2 h-3 w-3 rounded-full bg-red-500"
+                                className="mr-2 mt-2 h-3 w-3 rounded-full bg-red-500"
                             />
-                            <p className="text mb-4 mt-4 text-gray-500">Conversation in progress...</p>
+                            <p className="text mb-4 mt-6 text-gray-500">Conversation in progress...</p>
                         </div>
                     ) : (
-                        <p className="text mb-4 mt-4 text-gray-500">Ask anything about your knowledge base</p>
+                        <p className="text mb-4 mt-6 text-gray-500">Ask anything about your knowledge base</p>
                     )}
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
