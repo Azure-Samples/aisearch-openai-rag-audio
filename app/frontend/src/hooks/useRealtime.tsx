@@ -46,7 +46,8 @@ export default function useRealTime({
         onOpen: () => onWebSocketOpen?.(),
         onClose: () => onWebSocketClose?.(),
         onError: event => onWebSocketError?.(event),
-        onMessage: event => onMessageReceived(event)
+        onMessage: event => onMessageReceived(event),
+        shouldReconnect: () => true
     });
 
     const startSession = () => {
