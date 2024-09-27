@@ -38,7 +38,7 @@ export function GroundingFiles({ files, onSelected }: Properties) {
         <Card className="m-4 max-w-full md:max-w-md lg:min-w-96 lg:max-w-2xl">
             <CardHeader>
                 <CardTitle className="text-xl">Grounding files</CardTitle>
-                <CardDescription>Files used to ground the last answer.</CardDescription>
+                <CardDescription>Files used to ground the answers.</CardDescription>
             </CardHeader>
             <CardContent>
                 <AnimatePresence>
