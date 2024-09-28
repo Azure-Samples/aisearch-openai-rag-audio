@@ -1,0 +1,14 @@
+@keyframes barHeight1 {
+    0%, 100% { height: 20%; }
+    50% { height: 80%; }
+}
+
+@keyframes barHeight2 {
+    0%, 100% { height: 40%; }
+    50% { height: 60%; }
+}
+
+@keyframes barHeight3 {
+    0%, 100% { height: 60%; }
+    50% { height: 40%; }
+}

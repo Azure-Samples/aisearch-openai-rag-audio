@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Mic, History, MicOff } from "lucide-react";
-import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
 import GroundingFileView from "@/components/ui/grounding-file-view";
 import HistoryPanel from "@/components/ui/history-panel";
+import StatusMessage from "@/components/ui/status-message";
 
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
@@ -105,18 +105,7 @@ function App() {
                             </>
                         )}
                     </Button>
-                    {isRecording ? (
-                        <div className="flex items-center">
-                            <motion.div
-                                animate={{ opacity: [1, 0.5, 1] }}
-                                transition={{ repeat: Infinity, duration: 1 }}
-                                className="mr-2 mt-2 h-3 w-3 rounded-full bg-red-500"
-                            />
-                            <p className="text mb-4 mt-6 text-gray-500">Conversation in progress...</p>
-                        </div>
-                    ) : (
-                        <p className="text mb-4 mt-6 text-gray-500">Ask anything about Contoso employee benefits</p>
-                    )}
+                    <StatusMessage isRecording={isRecording} />
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
                 {HISTORY_ENABLED && history.length > 0 && (
