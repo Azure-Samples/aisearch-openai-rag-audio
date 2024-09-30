@@ -1,5 +1,4 @@
-import json
-from typing import Any, Optional
+from typing import Any
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents.aio import SearchClient
@@ -72,13 +71,10 @@ async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None
         docs.append({"chunk_id": r['chunk_id'], "title": r["title"], "chunk": r['chunk']})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
-def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str, search_key: Optional[str]) -> None:
-    if search_key is None:
-        search_creds = DefaultAzureCredential() 
-        search_creds.get_token("https://search.azure.com/.default") # warm this up before we start getting requests
-    else:
-        search_creds = AzureKeyCredential(search_key)
-    search_client = SearchClient(search_endpoint, search_index, search_creds)
+def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str, credentials: AzureKeyCredential | DefaultAzureCredential) -> None:
+    if isinstance(credentials, DefaultAzureCredential):
+        credentials.get_token("https://search.azure.com/.default") # warm this up before we start getting requests
+    search_client = SearchClient(search_endpoint, search_index, credentials, user_agent="RTMiddleTier")
 
     rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, args))
     rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, args))
