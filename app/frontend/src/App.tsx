@@ -1,31 +1,25 @@
 import { useState } from "react";
-import { Mic, History, MicOff } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
 import GroundingFileView from "@/components/ui/grounding-file-view";
-import HistoryPanel from "@/components/ui/history-panel";
 import StatusMessage from "@/components/ui/status-message";
 
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
 import useAudioPlayer from "@/hooks/useAudioPlayer";
 
-import { GroundingFile, HistoryItem, ToolResult } from "./types";
+import { GroundingFile, ToolResult } from "./types";
 
 // Use "wss://YOUR_INSTANCE_NAME.openai.azure.com" to bypass the middle tier and go directly to the LLM endpoint
 const AOAI_ENDPOINT_OVERRIDE = null;
 const AOAI_KEY = "none"; // Use a real key if bypassing the middle tier
 
-const HISTORY_ENABLED = false;
-
 function App() {
     const [isRecording, setIsRecording] = useState(false);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
-
-    const [showHistory, setShowHistory] = useState(false);
-    const [history, setHistory] = useState<HistoryItem[]>([]);
 
     const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
         aoaiEndpointOverride: AOAI_ENDPOINT_OVERRIDE,
@@ -39,16 +33,6 @@ function App() {
         },
         onReceivedInputAudioBufferSpeechStarted: () => {
             stopAudioPlayer();
-        },
-        onReceivedResponseDone: message => {
-            if (!HISTORY_ENABLED || message.response.output?.length === 0 || !message.response.output.some(x => !!x.content?.length)) {
-                return;
-            }
-
-            setHistory(prev => [
-                ...prev,
-                ...message.response.output.flatMap(o => o.content?.flatMap(c => ({ id: o.id, transcript: c.transcript, groundingFiles: [] })) ?? [])
-            ]);
         },
         onReceivedExtensionMiddleTierToolResponse: message => {
             const result: ToolResult = JSON.parse(message.tool_result);
@@ -108,12 +92,6 @@ function App() {
                     <StatusMessage isRecording={isRecording} />
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
-                {HISTORY_ENABLED && history.length > 0 && (
-                    <Button variant="outline" size="sm" onClick={() => setShowHistory(!showHistory)} className="rounded-full">
-                        <History className="mr-2 h-4 w-4" />
-                        Show history
-                    </Button>
-                )}
             </main>
 
             <footer className="py-4 text-center text-gray-400">
@@ -121,7 +99,6 @@ function App() {
             </footer>
 
             <GroundingFileView groundingFile={selectedFile} onClosed={() => setSelectedFile(null)} />
-            <HistoryPanel history={history} show={showHistory} onClosed={() => setShowHistory(false)} onSelectedGroundingFile={file => setSelectedFile(file)} />
         </div>
     );
 }
