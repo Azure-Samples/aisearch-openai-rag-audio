@@ -15,7 +15,7 @@ You'll need instances of the following Azure services. You can re-use service in
 
 You'll also need these in your local computer:
 1. [Node.js](https://nodejs.org/en)
-1. [Python >=3.10](https://www.python.org/downloads/)
+1. [Python >=3.12](https://www.python.org/downloads/)
    - **Important**: Python and the pip package manager must be in the path in Windows for the setup scripts to work.
    - **Important**: Ensure you can run `python --version` from console. On Ubuntu, you might need to run `sudo apt install python-is-python3` to link `python` to `python3`.
 1. [Powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
