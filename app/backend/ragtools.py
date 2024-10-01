@@ -65,7 +65,7 @@ async def _search_tool(search_client: SearchClient, args: Any) -> ToolResult:
 async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None:
     list = ",".join(args["sources"])
     print(f"Grounding source: {list}")
-    search_results = await search_client.search(filter=f"search.in(chunk_id, '{list}')", select="chunk_id,title,chunk")
+    search_results = await search_client.search(filter=f"search.in(chunk_id, '{list.replace("'", "''")}')", select="chunk_id,title,chunk")
     docs = []
     async for r in search_results:
         docs.append({"chunk_id": r['chunk_id'], "title": r["title"], "chunk": r['chunk']})
