@@ -62,8 +62,10 @@ class RTMiddleTier:
     def __init__(self, endpoint: str, credentials: AzureKeyCredential | DefaultAzureCredential):
         self.endpoint = endpoint
         if isinstance(credentials, AzureKeyCredential):
+            print("Using AzureKeyCredential for RTMiddleTier")
             self.key = credentials.key
         else:
+            print("Using DefaultAzureCredential for RTMiddleTier")
             self._token_provider = get_bearer_token_provider(credentials, "https://cognitiveservices.azure.com/.default")
             self._token_provider() # Warm up during startup so we have a token cached when the first request arrives
 
@@ -167,7 +169,7 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": "alpha" }
+            params = { "api-version": "alpha"}
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
@@ -175,6 +177,7 @@ class RTMiddleTier:
                 headers = { "api-key": self.key }
             else:
                 headers = { "Authorization": f"Bearer {self._token_provider()}" } # NOTE: no async version of token provider, maybe refresh token on a timer?
+            print(headers)
             async with session.ws_connect("/realtime", headers=headers, params=params) as target_ws:
                 async def from_client_to_server():
                     async for msg in ws:

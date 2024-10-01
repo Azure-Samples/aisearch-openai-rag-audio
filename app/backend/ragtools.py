@@ -63,16 +63,16 @@ async def _search_tool(search_client: SearchClient, args: Any) -> ToolResult:
 # TODO: move from sending all chunks used for grounding eagerly to only sending links to 
 # the original content in storage, it'll be more efficient overall
 async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None:
-    list = ",".join(args["sources"])
+    list = ",".join(args["sources"]).replace("'", "''")
     print(f"Grounding source: {list}")
-    search_results = await search_client.search(filter=f"search.in(chunk_id, '{list.replace("'", "''")}')", select="chunk_id,title,chunk")
+    search_results = await search_client.search(filter=f"search.in(chunk_id, '{list}')", select="chunk_id,title,chunk")
     docs = []
     async for r in search_results:
         docs.append({"chunk_id": r['chunk_id'], "title": r["title"], "chunk": r['chunk']})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
 def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str, credentials: AzureKeyCredential | DefaultAzureCredential) -> None:
-    if isinstance(credentials, DefaultAzureCredential):
+    if not isinstance(credentials, AzureKeyCredential):
         credentials.get_token("https://search.azure.com/.default") # warm this up before we start getting requests
     search_client = SearchClient(search_endpoint, search_index, credentials, user_agent="RTMiddleTier")
 

@@ -50,11 +50,23 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
 
 ### 4. Run the app
 1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
+1. Create a Python virtual environment and activate it.
 1. Run this command to start the app:
-   ```
+
+   Windows:
+
+   ```pwsh
    cd app
    pwsh .\start.ps1
    ```
+
+   Linux/Mac:
+
+   ```bash
+   cd app
+   ./start.sh
+   ```
+
 1. The app is available on http://localhost:8765
 
 Once the app is running, when you navigate to the URL above you should see the start screen of the app:
