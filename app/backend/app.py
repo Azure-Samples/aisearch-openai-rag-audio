@@ -22,11 +22,13 @@ if __name__ == "__main__":
     app = web.Application()
 
     rtmt = RTMiddleTier(llm_endpoint, llm_deployment, AzureKeyCredential(llm_key) if llm_key else credentials)
-    rtmt.system_message = "You are a helpful assistant. The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. " + \
-                          "Use the following step-by-step instructions to respond with short and concise answers using a knowledge base: " + \
-                          "Step 1 - Always use the 'search' tool to check the knowledge base before answering a question. " + \
-                          "Step 2 - Always use the 'report_grounding' tool to report the source of information from the knowledge base. " + \
-                          "Step 3 - Produce an answer that's as short as possible. If the answer isn't in the knowledge base, say you don't know."
+    rtmt.system_message = "You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. " + \
+                          "The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. " + \
+                          "Never read file names or source names or keys out loud. " + \
+                          "Always use the following step-by-step instructions to respond: \n" + \
+                          "1. Always use the 'search' tool to check the knowledge base before answering a question. \n" + \
+                          "2. Always use the 'report_grounding' tool to report the source of information from the knowledge base. \n" + \
+                          "3. Produce an answer that's as short as possible. If the answer isn't in the knowledge base, say you don't know."
     attach_rag_tools(rtmt, search_endpoint, search_index, AzureKeyCredential(search_key) if search_key else credentials)
 
     rtmt.attach_to_app(app, "/realtime")
