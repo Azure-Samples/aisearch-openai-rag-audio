@@ -42,6 +42,7 @@ class RTToolCall:
 
 class RTMiddleTier:
     endpoint: str
+    deployment: str
     key: Optional[str] = None
     
     # Tools are server-side only for now, though the case could be made for client-side tools
@@ -59,8 +60,9 @@ class RTMiddleTier:
     _tools_pending = {}
     _token_provider = None
 
-    def __init__(self, endpoint: str, credentials: AzureKeyCredential | DefaultAzureCredential):
+    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential):
         self.endpoint = endpoint
+        self.deployment = deployment
         if isinstance(credentials, AzureKeyCredential):
             self.key = credentials.key
         else:
@@ -167,7 +169,7 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": "2024-10-01-preview", "deployment": "gpt-4o-realtime-preview" }
+            params = { "api-version": "2024-10-01-preview", "deployment": self.deployment }
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
