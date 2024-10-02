@@ -51,7 +51,16 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
 
 ### 4. Run the app
 
+You have three options:
+
+- [Working directly in VS Code in your PC/Mac/Linux (without devcontainers)](#41-option-working-directly-in-vs-code-in-your-pcmaclinux-without-devcontainers)
+- [Using a devcontainer in your PC/Mac/Unix](#42-option-using-a-devcontainer-in-your-pcmacunix)
+- [Using Github Codespace](#43-option-using-github-codespace)
+
+#### 4.1 Option: Working directly in VS Code in your PC/Mac/Linux (without devcontainers)
+
 1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
+1. Create a .env file as per item [Setting up the environment](#3-setting-up-the-environment)
 1. Create a Python virtual environment and activate it.
 1. Run this command to start the app:
 
@@ -70,6 +79,51 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
    ```
 
 1. The app is available on http://localhost:8765
+
+#### 4.2 Option: Using a devcontainer in your PC/Mac/Unix
+
+1. Ensure that Docker desktop is running in your PC/Mac/Unix compute
+1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
+1. Start VS Code on the root folder of this project
+1. You will be presented with the option: ![Reopen in Container](./docs/reopenincontainer.png) 
+1. Click `Reopen in Container` and wait for the container to build
+1. Create a .env file as per item [Setting up the environment](#3-setting-up-the-environment)
+1. Run this command to start the app:
+
+   Powershell (option 1):
+
+   ```pwsh
+   cd app
+   pwsh start.ps1
+   ```
+
+   Bash (option 2):
+
+   ```bash
+   cd app
+   ./start.sh
+   ```
+
+#### 4.3 Option: Using Github Codespace
+
+1. In github, instead of cloning the repo, create a codespace, by clicking `Code` -> `Create a Codespace in Main` as shown below:
+![Create a codesapce](./docs/codespace.png)
+1. Create a .env file as per item [Setting up the environment](#3-setting-up-the-environment)
+1. Run this command to start the app:
+
+   Powershell (option 1):
+
+   ```pwsh
+   cd app
+   pwsh start.ps1
+   ```
+
+   Bash (option 2):
+
+   ```bash
+   cd app
+   ./start.sh
+   ```
 
 Once the app is running, when you navigate to the URL above you should see the start screen of the app:
 ![app screenshot](docs/talktoyourdataapp.png)
