@@ -49,6 +49,7 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys. 
 
 ### 4. Run the app
+
 1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
 1. Create a Python virtual environment and activate it.
 1. Run this command to start the app:
