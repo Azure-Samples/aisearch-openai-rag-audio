@@ -8,7 +8,7 @@ from rtmt import RTMiddleTier, Tool, ToolResult, ToolResultDirection
 _search_tool_schema = {
     "type": "function",
     "name": "search",
-    "description": "Search the knowledge base. The knowledge base is in English, translate to and from Engligh if " + \
+    "description": "Search the knowledge base. The knowledge base is in English, translate to and from English if " + \
                    "needed. Results are formatted as a source name first in square brackets, followed by the text " + \
                    "content, and a line with '-----' at the end of each result.",
     "parameters": {
