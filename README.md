@@ -41,6 +41,7 @@ For more details on ingesting data in Azure AI Search using "Import and vectoriz
 The app needs to know which service endpoints to use for the Azure OpenAI and Azure AI Search. The following variables can be set as environment variables, or you can create a ".env" file in the "app/backend/" directory with this content.
    ```
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
+   AZURE_OPENAI_DEPLOYMENT=gpt-4o-realtime-preview
    AZURE_OPENAI_API_KEY=<your api key>
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
@@ -49,12 +50,25 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys. 
 
 ### 4. Run the app
+
 1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
+1. Create a Python virtual environment and activate it.
 1. Run this command to start the app:
-   ```
+
+   Windows:
+
+   ```pwsh
    cd app
    pwsh .\start.ps1
    ```
+
+   Linux/Mac:
+
+   ```bash
+   cd app
+   ./start.sh
+   ```
+
 1. The app is available on http://localhost:8765
 
 Once the app is running, when you navigate to the URL above you should see the start screen of the app:

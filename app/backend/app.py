@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 from aiohttp import web
 from ragtools import attach_rag_tools
@@ -6,9 +7,11 @@ from rtmt import RTMiddleTier
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 
+
 if __name__ == "__main__":
     load_dotenv()
     llm_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    llm_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
     llm_key = os.environ.get("AZURE_OPENAI_API_KEY")
     search_endpoint = os.environ.get("AZURE_SEARCH_ENDPOINT")
     search_index = os.environ.get("AZURE_SEARCH_INDEX")
@@ -18,7 +21,7 @@ if __name__ == "__main__":
 
     app = web.Application()
 
-    rtmt = RTMiddleTier(llm_endpoint, AzureKeyCredential(llm_key) if llm_key else credentials)
+    rtmt = RTMiddleTier(llm_endpoint, llm_deployment, AzureKeyCredential(llm_key) if llm_key else credentials)
     rtmt.system_message = "You are a helpful assistant. The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. " + \
                           "Use the following step-by-step instructions to respond with short and concise answers using a knowledge base: " + \
                           "Step 1 - Always use the 'search' tool to check the knowledge base before answering a question. " + \
