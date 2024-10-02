@@ -8,10 +8,12 @@ import {
     ResponseAudioTranscriptDelta,
     ResponseDone,
     SessionUpdateCommand,
-    ExtensionMiddleTierToolResponse
+    ExtensionMiddleTierToolResponse,
+    ResponseInputAudioTranscriptionCompleted
 } from "@/types";
 
 type Parameters = {
+    enableInputAudioTranscription?: boolean;
     onWebSocketOpen?: () => void;
     onWebSocketClose?: () => void;
     onWebSocketError?: (event: Event) => void;
@@ -22,10 +24,12 @@ type Parameters = {
     onReceivedResponseDone?: (message: ResponseDone) => void;
     onReceivedExtensionMiddleTierToolResponse?: (message: ExtensionMiddleTierToolResponse) => void;
     onReceivedResponseAudioTranscriptDelta?: (message: ResponseAudioTranscriptDelta) => void;
+    onReceivedInputAudioTranscriptionCompleted?: (message: ResponseInputAudioTranscriptionCompleted) => void;
     onReceivedError?: (message: Message) => void;
 };
 
 export default function useRealTime({
+    enableInputAudioTranscription,
     onWebSocketOpen,
     onWebSocketClose,
     onWebSocketError,
@@ -35,6 +39,7 @@ export default function useRealTime({
     onReceivedResponseAudioTranscriptDelta,
     onReceivedInputAudioBufferSpeechStarted,
     onReceivedExtensionMiddleTierToolResponse,
+    onReceivedInputAudioTranscriptionCompleted,
     onReceivedError
 }: Parameters) {
     const { sendJsonMessage } = useWebSocket("/realtime", {
@@ -54,6 +59,12 @@ export default function useRealTime({
                 }
             }
         };
+
+        if (enableInputAudioTranscription) {
+            command.session.input_audio_transcription = {
+                model: "whisper-1"
+            };
+        }
 
         sendJsonMessage(command);
     };
@@ -98,6 +109,9 @@ export default function useRealTime({
                 break;
             case "input_audio_buffer.speech_started":
                 onReceivedInputAudioBufferSpeechStarted?.(message);
+                break;
+            case "conversation.item.input_audio_transcription.completed":
+                onReceivedInputAudioTranscriptionCompleted?.(message as ResponseInputAudioTranscriptionCompleted);
                 break;
             case "extension.middle_tier_tool_response":
                 onReceivedExtensionMiddleTierToolResponse?.(message as ExtensionMiddleTierToolResponse);

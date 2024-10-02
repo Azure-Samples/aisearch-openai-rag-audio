@@ -16,6 +16,9 @@ export type SessionUpdateCommand = {
         turn_detection?: {
             type: "server_vad" | "none";
         };
+        input_audio_transcription?: {
+            model: "whisper-1";
+        };
     };
 };
 
@@ -40,6 +43,14 @@ export type ResponseAudioDelta = {
 export type ResponseAudioTranscriptDelta = {
     type: "response.audio_transcript.delta";
     delta: string;
+};
+
+export type ResponseInputAudioTranscriptionCompleted = {
+    type: "conversation.item.input_audio_transcription.completed";
+    event_id: string;
+    item_id: string;
+    content_index: number;
+    transcript: string;
 };
 
 export type ResponseDone = {
