@@ -62,10 +62,8 @@ class RTMiddleTier:
     def __init__(self, endpoint: str, credentials: AzureKeyCredential | DefaultAzureCredential):
         self.endpoint = endpoint
         if isinstance(credentials, AzureKeyCredential):
-            print("Using AzureKeyCredential for RTMiddleTier")
             self.key = credentials.key
         else:
-            print("Using DefaultAzureCredential for RTMiddleTier")
             self._token_provider = get_bearer_token_provider(credentials, "https://cognitiveservices.azure.com/.default")
             self._token_provider() # Warm up during startup so we have a token cached when the first request arrives
 

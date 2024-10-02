@@ -6,7 +6,7 @@ from aiohttp import web
 from ragtools import attach_rag_tools
 from rtmt import RTMiddleTier
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import AzureDeveloperCliCredential
+from azure.identity import DefaultAzureCredential
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     search_index = os.environ.get("AZURE_SEARCH_INDEX")
     search_key = os.environ.get("AZURE_SEARCH_API_KEY")
 
-    credentials = AzureDeveloperCliCredential(tenant_id=os.environ.get("AZURE_TENANT_ID"), process_timeout=60) if not llm_key or not search_key else None
+    credentials = DefaultAzureCredential() if not llm_key or not search_key else None
 
     app = web.Application()
 
