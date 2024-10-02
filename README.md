@@ -1,5 +1,7 @@
 # VoiceRAG: An Application Pattern for RAG + Voice Using Azure AI Search and the GPT-4o Realtime API for Audio
 
+[![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure-Samples/aisearch-openai-rag-audio)
+
 This repo contains an example of how to implement RAG support in applications that use voice as their user interface, powered by the GPT-4o realtime API for audio. We describe the pattern in more detail in [this blog post](https://aka.ms/voicerag), and you can see this sample app in action in [this short video](https://youtu.be/vXJka8xZ9Ko).
 
 ![RTMTPattern](docs/RTMTPattern.png)
@@ -12,13 +14,6 @@ You'll need instances of the following Azure services. You can re-use service in
 1. [Azure OpenAI](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI), with 2 model deployments, one of the **gpt-4o-realtime-preview** model, and one for embeddings (e.g.text-embedding-3-large, text-embedding-3-small, or text-embedding-ada-002)
 1. [Azure AI Search](https://ms.portal.azure.com/#create/Microsoft.Search), any tier Basic or above will work, ideally with [Semantic Search enabled](https://learn.microsoft.com/azure/search/semantic-how-to-enable-disable)
 1. [Azure Blob Storage](https://ms.portal.azure.com/#create/Microsoft.StorageAccount-ARM), with a container that has the content that represents your knowledge base (we include some sample data in this repo if you want an easy starting point)
-
-You'll also need these in your local computer:
-1. [Node.js](https://nodejs.org/en)
-1. [Python >=3.12](https://www.python.org/downloads/)
-   - **Important**: Python and the pip package manager must be in the path in Windows for the setup scripts to work.
-   - **Important**: Ensure you can run `python --version` from console. On Ubuntu, you might need to run `sudo apt install python-is-python3` to link `python` to `python3`.
-1. [Powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 ### 2. Creating an index
 RAG applications use a retrieval system to get the right grounding data for LLMs. We use Azure AI Search as our retrieval system, so we need to get our knowledge base (e.g. documents or any other content you want the app to be able to talk about) into an Azure AI Search index.
@@ -49,11 +44,29 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
    ```
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys. 
 
-### 4. Run the app
+### VSCode Dev Containers
+You can run the project in your local VSCode Dev Container using the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
 
-1. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
-1. Create a Python virtual environment and activate it.
-1. Run this command to start the app:
+1. Start Docker Desktop (install it if not already installed)
+2. Open the project:
+    [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/aisearch-openai-rag-audio)
+3. In the VSCode window that opens, once the project files show up (this may take several minutes), open a new terminal and run 
+```bash
+cd app
+./start.sh
+```
+
+### Local environment
+1. Install the required tools:
+   - [Node.js](https://nodejs.org/en)
+   - [Python >=3.11](https://www.python.org/downloads/)
+      - **Important**: Python and the pip package manager must be in the path in Windows for the setup scripts to work.
+      - **Important**: Ensure you can run `python --version` from console. On Ubuntu, you might need to run `sudo apt install python-is-python3` to link `python` to `python3`.
+   - [Powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
+
+2. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
+3. Create a Python virtual environment and activate it.
+4. Run this command to start the app:
 
    Windows:
 
@@ -69,7 +82,7 @@ The app needs to know which service endpoints to use for the Azure OpenAI and Az
    ./start.sh
    ```
 
-1. The app is available on http://localhost:8765
+5. The app is available on http://localhost:8765
 
 Once the app is running, when you navigate to the URL above you should see the start screen of the app:
 ![app screenshot](docs/talktoyourdataapp.png)
