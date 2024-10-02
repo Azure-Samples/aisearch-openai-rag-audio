@@ -41,6 +41,7 @@ For more details on ingesting data in Azure AI Search using "Import and vectoriz
 The app needs to know which service endpoints to use for the Azure OpenAI and Azure AI Search. The following variables can be set as environment variables, or you can create a ".env" file in the "app/backend/" directory with this content.
    ```
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
+   AZURE_OPENAI_DEPLOYMENT=gpt-4o-realtime-preview
    AZURE_OPENAI_API_KEY=<your api key>
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
