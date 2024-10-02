@@ -12,9 +12,6 @@ import {
 } from "@/types";
 
 type Parameters = {
-    aoaiEndpointOverride?: string | null;
-    aoaiApiKey?: string | null;
-
     onWebSocketOpen?: () => void;
     onWebSocketClose?: () => void;
     onWebSocketError?: (event: Event) => void;
@@ -29,8 +26,6 @@ type Parameters = {
 };
 
 export default function useRealTime({
-    aoaiEndpointOverride,
-    aoaiApiKey,
     onWebSocketOpen,
     onWebSocketClose,
     onWebSocketError,
@@ -42,7 +37,7 @@ export default function useRealTime({
     onReceivedExtensionMiddleTierToolResponse,
     onReceivedError
 }: Parameters) {
-    const { sendJsonMessage } = useWebSocket(`${aoaiEndpointOverride ?? ""}/realtime?api-key=${aoaiApiKey}&api-version=alpha`, {
+    const { sendJsonMessage } = useWebSocket("/realtime", {
         onOpen: () => onWebSocketOpen?.(),
         onClose: () => onWebSocketClose?.(),
         onError: event => onWebSocketError?.(event),

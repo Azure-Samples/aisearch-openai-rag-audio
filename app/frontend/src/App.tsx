@@ -14,18 +14,12 @@ import { GroundingFile, ToolResult } from "./types";
 
 import logo from "./assets/logo.svg";
 
-// Use "wss://YOUR_INSTANCE_NAME.openai.azure.com" to bypass the middle tier and go directly to the LLM endpoint
-const AOAI_ENDPOINT_OVERRIDE = null;
-const AOAI_KEY = "none"; // Use a real key if bypassing the middle tier
-
 function App() {
     const [isRecording, setIsRecording] = useState(false);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
 
     const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
-        aoaiEndpointOverride: AOAI_ENDPOINT_OVERRIDE,
-        aoaiApiKey: AOAI_KEY,
         onWebSocketOpen: () => console.log("WebSocket connection opened"),
         onWebSocketClose: () => console.log("WebSocket connection closed"),
         onWebSocketError: event => console.error("WebSocket error:", event),
