@@ -167,7 +167,7 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": "2024-10-01-preview", "deployment": "gpt-4o-realtime-preview" } #
+            params = { "api-version": "2024-10-01-preview", "deployment": "gpt-4o-realtime-preview" }
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
