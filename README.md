@@ -104,6 +104,20 @@ You can run the project in your local VS Code Dev Container using the [Dev Conta
 Once the app is running, when you navigate to the URL above you should see the start screen of the app:
 ![app screenshot](docs/talktoyourdataapp.png)
 
+### Frontend: enabling direct communication with AOAI Realtime API
+You can make the frontend skip the middle tier and talk to the websockets AOAI Realtime API directly, if you choose to do so. However note this'll stop RAG from happening, and will requiring exposing your API key in the frontend which is very insecure. DO NOT use this in production.
+
+Just Pass some extra parameters to the `useRealtime` hook:
+```typescript
+const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
+        useDirectAoaiApi: true,
+        aoaiEndpointOverride: "wss://<NAME>.openai.azure.com",
+        aoaiApiKeyOverride: "<YOUR API KEY, INSECURE!!!>",
+        aoaiModelOverride: "gpt-4o-realtime-preview",
+        ...
+);
+```
+
 ### Notes
 
 >Sample data: The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.

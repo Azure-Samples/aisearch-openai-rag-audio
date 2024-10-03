@@ -13,6 +13,11 @@ import {
 } from "@/types";
 
 type Parameters = {
+    useDirectAoaiApi?: boolean; // If true, the middle tier will be skipped and the AOAI ws API will be called directly
+    aoaiEndpointOverride?: string;
+    aoaiApiKeyOverride?: string;
+    aoaiModelOverride?: string;
+
     enableInputAudioTranscription?: boolean;
     onWebSocketOpen?: () => void;
     onWebSocketClose?: () => void;
@@ -29,6 +34,10 @@ type Parameters = {
 };
 
 export default function useRealTime({
+    useDirectAoaiApi,
+    aoaiEndpointOverride,
+    aoaiApiKeyOverride,
+    aoaiModelOverride,
     enableInputAudioTranscription,
     onWebSocketOpen,
     onWebSocketClose,
@@ -42,7 +51,11 @@ export default function useRealTime({
     onReceivedInputAudioTranscriptionCompleted,
     onReceivedError
 }: Parameters) {
-    const { sendJsonMessage } = useWebSocket("/realtime", {
+    const wsEndpoint = useDirectAoaiApi
+        ? `${aoaiEndpointOverride}/openai/realtime?api-key=${aoaiApiKeyOverride}&deployment=${aoaiModelOverride}&api-version=2024-10-01-preview`
+        : `/realtime`;
+
+    const { sendJsonMessage } = useWebSocket(wsEndpoint, {
         onOpen: () => onWebSocketOpen?.(),
         onClose: () => onWebSocketClose?.(),
         onError: event => onWebSocketError?.(event),
