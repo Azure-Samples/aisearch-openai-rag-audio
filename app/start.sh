@@ -1,9 +1,24 @@
-#!/bin/bash
+#!/bin/sh
+
+echo ""
+echo 'Creating python virtual environment ".venv"'
+echo ""
+cd ./backend
+python3 -m venv .venv
+
+echo ""
+echo "Restoring backend python packages"
+echo ""
+./.venv/bin/python -m pip install -r requirements.txt
+if [ $? -ne 0 ]; then
+    echo "Failed to restore backend python packages"
+    exit $?
+fi
 
 echo ""
 echo "Restoring frontend npm packages"
 echo ""
-cd frontend
+cd ../frontend
 npm install
 if [ $? -ne 0 ]; then
     echo "Failed to restore frontend npm packages"
@@ -20,20 +35,10 @@ if [ $? -ne 0 ]; then
 fi
 
 echo ""
-echo "Restoring backend python packages"
-echo ""
-cd ../backend
-pip install -r requirements.txt
-if [ $? -ne 0 ]; then
-    echo "Failed to restore backend python packages"
-    exit $?
-fi
-
-echo ""
 echo "Starting backend"
 echo ""
-open http://127.0.0.1:8765
-python app.py
+cd ../backend
+./.venv/bin/python app.py --reload
 if [ $? -ne 0 ]; then
     echo "Failed to start backend"
     exit $?

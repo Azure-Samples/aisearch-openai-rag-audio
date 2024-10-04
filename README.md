@@ -72,7 +72,6 @@ You can run the project in your local VS Code Dev Container using the [Dev Conta
    - [Powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 2. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
-3. Create a Python virtual environment and activate it.
 4. The app needs to know which service endpoints to use for the Azure OpenAI and Azure AI Search. The following variables can be set as environment variables, or you can create a ".env" file in the "app/backend/" directory with this content.
    ```
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com

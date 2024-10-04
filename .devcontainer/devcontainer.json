@@ -23,7 +23,5 @@
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [
         8765
-    ],
-    // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "cd app/frontend && npm install && cd ../backend && pip install -r requirements.txt"
+    ]
 }
