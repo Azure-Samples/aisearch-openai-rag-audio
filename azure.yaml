@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: azure-search-openai-demo
+metadata:
+  template: azure-search-openai-demo@0.0.2-beta
+services:
+  backend:
+    project: ./app/backend
+    language: py
+    host: containerapp
+    docker:
+      remoteBuild: true
+          # This hook is called when Azure Container Apps is the host
+    hooks:
+      prebuild:
+        windows:
+          shell: pwsh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
+        posix:
+          shell: sh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
