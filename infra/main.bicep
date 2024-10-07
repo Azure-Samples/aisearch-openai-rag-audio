@@ -238,6 +238,9 @@ module searchService 'br/public:avm/res/search/search-service:0.7.1' = {
     disableLocalAuth: true
     sku: searchServiceSkuName
     semanticSearch: actualSearchServiceSemanticRankerLevel
+    // An outbound managed identity is required for integrated vectorization to work,
+    // and is only supported on non-free tiers:
+    managedIdentities: {systemAssigned: true}
     roleAssignments:[
       {
         roleDefinitionIdOrName: 'Search Index Data Reader'
@@ -296,12 +299,6 @@ module storage 'br/public:avm/res/storage/storage-account:0.9.1' = {
         principalId: principalId
         principalType: principalType
       }
-      // Necessary for integrated vectorization:
-      {
-        roleDefinitionIdOrName: 'Storage Blob Data Reader'
-        principalId: searchService.outputs.systemAssignedMIPrincipalId
-        principalType: 'ServicePrincipal'
-      }
     ]
   }
 }
@@ -318,16 +315,6 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   }
 }
 
-module openAiRoleSearchService 'core/security/role.bicep' = {
-  scope: openAiResourceGroup
-  name: 'openai-role-searchservice'
-  params: {
-    principalId: searchService.outputs.systemAssignedMIPrincipalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: 'ServicePrincipal'
-  }
-}
-
 // Used to issue search queries
 // https://learn.microsoft.com/azure/search/search-security-rbac
 module searchRoleBackend 'core/security/role.bicep' = {
@@ -336,6 +323,26 @@ module searchRoleBackend 'core/security/role.bicep' = {
   params: {
     principalId: acaBackend.outputs.identityPrincipalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module storageRoleSearchService 'core/security/role.bicep' = {
+  scope: storageResourceGroup
+  name: 'storage-role-searchservice'
+  params: {
+    principalId: searchService.outputs.systemAssignedMIPrincipalId
+    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' // Storage Blob Data Reader
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module openAiRoleSearchService 'core/security/role.bicep' = {
+  scope: openAiResourceGroup
+  name: 'openai-role-searchservice'
+  params: {
+    principalId: searchService.outputs.systemAssignedMIPrincipalId
+    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: 'ServicePrincipal'
   }
 }
