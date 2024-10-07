@@ -21,7 +21,7 @@
       "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
     },
     "searchIndexName": {
-      "value": "${AZURE_SEARCH_INDEX=gptkbindex}"
+      "value": "${AZURE_SEARCH_INDEX=voicerag-intvect}"
     },
     "searchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE}"

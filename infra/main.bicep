@@ -218,6 +218,8 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.5.4' = {
     sku: 'S0'
     deployments: openAiDeployments
     disableLocalAuth: true
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {}
     roleAssignments: [
       {
         roleDefinitionIdOrName: 'Cognitive Services OpenAI User'

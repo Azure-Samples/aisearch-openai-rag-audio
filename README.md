@@ -82,21 +82,20 @@ You can run the project in your local VS Code Dev Container using the [Dev Conta
    AZURE_SEARCH_INDEX=<your index name>
    AZURE_SEARCH_API_KEY=<your api key>
    ```
-   To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys.  
+   To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys.
+
 5. Run this command to start the app:
 
    Windows:
 
    ```pwsh
-   cd app
-   pwsh .\start.ps1
+   pwsh .\scripts\start.ps1
    ```
 
    Linux/Mac:
 
    ```bash
-   cd app
-   ./start.sh
+   ./scripts/start.sh
    ```
 
 6. The app is available on http://localhost:8765

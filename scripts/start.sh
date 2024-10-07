@@ -3,7 +3,7 @@
 echo ""
 echo "Restoring frontend npm packages"
 echo ""
-cd frontend
+cd app/frontend
 npm install
 if [ $? -ne 0 ]; then
     echo "Failed to restore frontend npm packages"
@@ -22,8 +22,8 @@ fi
 echo ""
 echo "Restoring backend python packages"
 echo ""
-cd ../backend
-pip install -r requirements.txt
+cd ../../
+pip install -r app/backend/requirements.txt
 if [ $? -ne 0 ]; then
     echo "Failed to restore backend python packages"
     exit $?
@@ -32,7 +32,7 @@ fi
 echo ""
 echo "Starting backend"
 echo ""
-python app.py
+python app/backend/app.py
 if [ $? -ne 0 ]; then
     echo "Failed to start backend"
     exit $?

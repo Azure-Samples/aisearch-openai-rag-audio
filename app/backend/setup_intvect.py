@@ -1,6 +1,7 @@
 import logging
 import os
 
+from azure.core.exceptions import ResourceExistsError
 from azure.identity import AzureDeveloperCliCredential
 from azure.search.documents.indexes import SearchIndexClient, SearchIndexerClient
 from azure.search.documents.indexes.models import (
@@ -182,8 +183,7 @@ else:
         )
     )
 
-# Now upload the documents in /data folder to the blob storage container
-# and start the indexer
+# Upload the documents in /data folder to the blob storage container
 blob_client = BlobServiceClient(
     account_url=AZURE_STORAGE_ENDPOINT, credential=azure_credential,
     max_single_put_size=4 * 1024 * 1024
@@ -191,13 +191,22 @@ blob_client = BlobServiceClient(
 container_client = blob_client.get_container_client(AZURE_STORAGE_CONTAINER)
 if not container_client.exists():
     container_client.create_container()
+existing_blobs = [blob.name for blob in container_client.list_blobs()]
 
 # Open each file in /data folder
 for file in os.scandir("data"):
     with open(file.path, "rb") as opened_file:
         filename = os.path.basename(file.path)
-        logger.info("Uploading blob for whole file -> %s", filename)
-        blob_client = container_client.upload_blob(filename, opened_file, overwrite=True)
+        # Check if blob already exists
+        if filename in existing_blobs:
+            logger.info("Blob already exists, skipping file: %s", filename)
+        else:
+            logger.info("Uploading blob for file: %s", filename)
+            blob_client = container_client.upload_blob(filename, opened_file, overwrite=True)
 
-indexer_client.run_indexer(NAME)
-indexer_client.close()
+# Start the indexer
+try:
+    indexer_client.run_indexer(NAME)
+    logger.info("Indexer started. Any unindexed blobs should be indexed in a few minutes, check the Portal for status.")
+except ResourceExistsError:
+    logger.info("Indexer already running, not starting again")

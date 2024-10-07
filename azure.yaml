@@ -23,3 +23,15 @@ services:
           run:  cd ../frontend;npm install;npm run build
           interactive: false
           continueOnError: false
+hooks:
+    postprovision:
+      windows:
+        shell: pwsh
+        run: ./scripts/setup_index.ps1
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./scripts/setup_index.sh
+        interactive: true
+        continueOnError: false
