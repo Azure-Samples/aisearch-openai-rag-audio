@@ -63,7 +63,6 @@ param storageSkuName string // Set in main.parameters.json
 param openAiServiceName string = ''
 param openAiResourceGroupName string = ''
 
-
 @description('Location for the OpenAI resource group')
 @allowed([
   'eastus2'
@@ -83,7 +82,6 @@ param tenantId string = tenant().tenantId
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
-
 
 var abbrs = loadJsonContent('abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
@@ -141,7 +139,6 @@ module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.4.0' = {
     useResourcePermissions: true
   }
 }
-
 
 // Azure container apps resources
 
@@ -269,8 +266,8 @@ module searchService 'br/public:avm/res/search/search-service:0.7.1' = {
     semanticSearch: actualSearchServiceSemanticRankerLevel
     // An outbound managed identity is required for integrated vectorization to work,
     // and is only supported on non-free tiers:
-    managedIdentities: {systemAssigned: true}
-    roleAssignments:[
+    managedIdentities: { systemAssigned: true }
+    roleAssignments: [
       {
         roleDefinitionIdOrName: 'Search Index Data Reader'
         principalId: principalId
@@ -331,7 +328,6 @@ module storage 'br/public:avm/res/storage/storage-account:0.9.1' = {
     ]
   }
 }
-
 
 // Roles for the backend to access other services
 module openAiRoleBackend 'core/security/role.bicep' = {
