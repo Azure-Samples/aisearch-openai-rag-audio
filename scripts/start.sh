@@ -1,18 +1,6 @@
 #!/bin/sh
 
-echo ""
-echo 'Creating python virtual environment ".venv"'
-echo ""
-python3 -m venv .venv
-
-echo ""
-echo "Restoring backend python packages"
-echo ""
-./.venv/bin/python -m pip install -r app/backend/requirements.txt
-if [ $? -ne 0 ]; then
-    echo "Failed to restore backend python packages"
-    exit $?
-fi
+. ./scripts/load_python_env.sh
 
 echo ""
 echo "Restoring frontend npm packages"

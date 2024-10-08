@@ -263,6 +263,7 @@ module searchService 'br/public:avm/res/search/search-service:0.7.1' = {
     tags: tags
     disableLocalAuth: true
     sku: searchServiceSkuName
+    replicaCount: 1
     semanticSearch: actualSearchServiceSemanticRankerLevel
     // An outbound managed identity is required for integrated vectorization to work,
     // and is only supported on non-free tiers:

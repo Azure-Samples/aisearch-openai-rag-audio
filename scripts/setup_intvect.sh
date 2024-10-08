@@ -1,3 +1,5 @@
  #!/bin/sh
 
-python ./app/backend/setup_intvect.py
+. ./scripts/load_python_env.sh
+
+./.venv/bin/python ./app/backend/setup_intvect.py
