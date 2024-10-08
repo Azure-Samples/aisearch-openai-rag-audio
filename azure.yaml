@@ -27,11 +27,11 @@ hooks:
     postprovision:
       windows:
         shell: pwsh
-        run: ./scripts/setup_index.ps1
+        run: ./scripts/write_env.ps1; ./scripts/setup_intvect.ps1
         interactive: true
         continueOnError: false
       posix:
         shell: sh
-        run: ./scripts/setup_index.sh
+        run: ./scripts/write_env.sh; ./scripts/setup_intvect.sh
         interactive: true
         continueOnError: false

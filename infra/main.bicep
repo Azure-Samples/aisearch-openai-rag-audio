@@ -6,13 +6,40 @@ targetScope = 'subscription'
 param environmentName string
 
 @minLength(1)
-@description('Primary location for all resources')
+@description('Location for AI Search and Storage resources')
+// Constrained due to semantic ranker availability: https://learn.microsoft.com/azure/search/search-region-support#americas
+@allowed([
+  'brazilsouth'
+  'canadacentral'
+  'canadaeast'
+  'eastus2'
+  'northcentralus'
+  'westus'
+  'westus2'
+  'westcentralus'
+  'northeurope'
+  'francecentral'
+  'switzerlandnorth'
+  'switzerlandwest'
+  'uksouth'
+  'australiaeast'
+  'eastasia'
+  'southeastasia'
+  'centralindia'
+  'jioindiawest'
+  'japanwest'
+  'koreacentral'
+])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
 param location string
 
 param backendServiceName string = '' // Set in main.parameters.json
 param resourceGroupName string = '' // Set in main.parameters.json
 
-param applicationInsightsName string = '' // Set in main.parameters.json
 param logAnalyticsName string = '' // Set in main.parameters.json
 
 param searchServiceName string = '' // Set in main.parameters.json
