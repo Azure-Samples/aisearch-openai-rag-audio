@@ -20,10 +20,6 @@ The `RTClient` in the frontend receives the audio input, sends that to the Pytho
 
 This repository includes infrastructure as code and a `Dockerfile` to deploy the app to Azure Container Apps, but it can also be run locally as long as Azure AI Search and Azure OpenAI services are configured.
 
-### Demo Video
-
-[![VoiceRAG demo video](docs/voiceragvideo.png)](https://youtu.be/vXJka8xZ9Ko)
-
 ## Getting Started
 
 You have a few options for getting started with this template. The quickest way to get started is [GitHub Codespaces](#github-codespaces), since it will setup all the tools for you, but you can also [set it up locally](#local-environment). You can also use a [VS Code dev container](#vs-code-dev-containers)
