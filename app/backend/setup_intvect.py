@@ -151,7 +151,7 @@ else:
                     inputs=[InputFieldMappingEntry(name="text", source="/document/pages/*")],
                     outputs=[OutputFieldMappingEntry(name="embedding", target_name="text_vector")])
             ],
-            index_projection=SearchIndexerIndexProjections(
+            index_projections=SearchIndexerIndexProjections(
                 selectors=[
                     SearchIndexerIndexProjectionSelector(
                         target_index_name=NAME,
