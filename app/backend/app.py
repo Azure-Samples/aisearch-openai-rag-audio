@@ -5,8 +5,8 @@ from pathlib import Path
 from aiohttp import web
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
+from dotenv import load_dotenv
 
-from load_azd_env import load_azd_env
 from ragtools import attach_rag_tools
 from rtmt import RTMiddleTier
 
@@ -16,7 +16,7 @@ logger = logging.getLogger("voicerag")
 async def create_app():
     if not os.environ.get("RUNNING_IN_PRODUCTION"):
         logger.info("Running in development mode, loading from .env file")
-        load_azd_env()
+        load_dotenv()
     llm_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
     llm_deployment = os.environ.get("AZURE_OPENAI_REALTIME_DEPLOYMENT")
     llm_key = os.environ.get("AZURE_OPENAI_API_KEY")
