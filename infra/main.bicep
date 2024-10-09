@@ -73,7 +73,7 @@ param openAiResourceGroupName string = ''
     type: 'location'
   }
 })
-param openAiResourceGroupLocation string
+param openAiResourceLocation string
 
 param realtimeDeploymentCapacity int // Set in main.parameters.json
 param embeddingDeploymentCapacity int // Set in main.parameters.json
@@ -233,7 +233,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.5.4' = {
   scope: openAiResourceGroup
   params: {
     name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-    location: openAiResourceGroupLocation
+    location: openAiResourceLocation
     tags: tags
     kind: 'OpenAI'
     customSubDomainName: !empty(openAiServiceName)

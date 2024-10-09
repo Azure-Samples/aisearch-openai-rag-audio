@@ -8,7 +8,6 @@ param containerRegistryName string
 param containerRegistryResourceGroupName string = ''
 param containerRegistryAdminUserEnabled bool = false
 param logAnalyticsWorkspaceResourceId string
-param applicationInsightsName string = '' // Not used here, was used for DAPR
 param virtualNetworkSubnetId string = ''
 @allowed(['Consumption', 'D4', 'D8', 'D16', 'D32', 'E4', 'E8', 'E16', 'E32', 'NC24-A100', 'NC48-A100', 'NC96-A100'])
 param workloadProfile string
