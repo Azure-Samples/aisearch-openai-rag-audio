@@ -1,5 +1,6 @@
 import re
 from typing import Any
+
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents.aio import SearchClient
