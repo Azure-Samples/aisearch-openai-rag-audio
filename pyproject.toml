@@ -1,0 +1,5 @@
+[tool.ruff]
+target-version = "py39"
+lint.select = ["E", "F", "I", "UP"]
+lint.ignore = ["E501", "E701"]
+src = ["app/backend"]

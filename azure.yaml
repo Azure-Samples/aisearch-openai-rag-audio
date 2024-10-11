@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: aisearch-openai-rag-audio
+metadata:
+  template: aisearch-openai-rag-audio@0.0.2-beta
+services:
+  backend:
+    project: ./app/backend
+    language: py
+    host: containerapp
+    docker:
+      remoteBuild: true
+    hooks:
+      prebuild:
+        windows:
+          shell: pwsh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
+        posix:
+          shell: sh
+          run:  cd ../frontend;npm install;npm run build
+          interactive: false
+          continueOnError: false
+hooks:
+    postprovision:
+      windows:
+        shell: pwsh
+        run: ./scripts/write_env.ps1; ./scripts/setup_intvect.ps1
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./scripts/write_env.sh; ./scripts/setup_intvect.sh
+        interactive: true
+        continueOnError: false
