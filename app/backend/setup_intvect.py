@@ -86,7 +86,7 @@ def setup_index(azure_credential, index_name, azure_search_endpoint, azure_stora
                 fields=[
                     SearchableField(name="chunk_id", key=True, analyzer_name="keyword", sortable=True),
                     SimpleField(name="parent_id", type=SearchFieldDataType.String, filterable=True),
-                    SearchableField(name="title", filterable=True),
+                    SearchableField(name="title"),
                     SearchableField(name="chunk"),
                     SearchField(
                         name="text_vector", 
@@ -210,7 +210,7 @@ def upload_documents(azure_credential, indexer_name, azure_search_endpoint, azur
     # Start the indexer
     try:
         indexer_client.run_indexer(indexer_name)
-        logger.info("Indexer started. Any unindexed blobs should be indexed in a few minutes, check the Portal for status.")
+        logger.info("Indexer started. Any unindexed blobs should be indexed in a few minutes, check the Azure Portal for status.")
     except ResourceExistsError:
         logger.info("Indexer already running, not starting again")
 

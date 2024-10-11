@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: azure-search-openai-demo
+name: aisearch-openai-rag-audio
 metadata:
-  template: azure-search-openai-demo@0.0.2-beta
+  template: aisearch-openai-rag-audio@0.0.2-beta
 services:
   backend:
     project: ./app/backend
@@ -10,7 +10,6 @@ services:
     host: containerapp
     docker:
       remoteBuild: true
-          # This hook is called when Azure Container Apps is the host
     hooks:
       prebuild:
         windows:

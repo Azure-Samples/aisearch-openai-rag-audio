@@ -54,8 +54,7 @@ You can run the project in your local VS Code Dev Container using the [Dev Conta
    * [Powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) - For Windows users only.
 
 2. Clone the repo (`git clone https://github.com/Azure-Samples/aisearch-openai-rag-audio`)
-3. Create a Python virtual environment and activate it.
-4. Proceed to the next section to [deploy the app](#deploying-the-app).
+3. Proceed to the next section to [deploy the app](#deploying-the-app).
 
 ## Deploying the app
 
