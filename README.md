@@ -81,8 +81,6 @@ The steps below will provision Azure resources and deploy the application code t
     Enter a name that will be used for the resource group.
     This will create a new folder in the `.azure` folder, and set it as the active environment for any calls to `azd` going forward.
 
-<!-- 1. (Optional) This is the point where you can customize the deployment by setting environment variables, in order to [use existing resources](docs/deploy_existing.md).-->
-
 1. Run this single command to provision the resources, deploy the code, and setup integrated vectorization for the sample data:
 
    ```shell
