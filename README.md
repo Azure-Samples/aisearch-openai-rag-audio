@@ -120,3 +120,13 @@ const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
 ### Notes
 
 >Sample data: The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.
+
+### Change of voice
+
+If you want to change the voice for the gpt4-o voice available change in the file backend/rtmt.py the following line 172
+```python
+                params = { "api-version": "2024-10-01-preview", "deployment": self.deployment, "voice" : "nova" }
+```
+
+The different voices available are ( don't forget the accent are principally in english) and only one voice can choose per request: 
+> alloy,echo,fable,onyx,nova and shimmer
