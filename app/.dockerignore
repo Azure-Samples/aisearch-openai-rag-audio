@@ -1,0 +1,9 @@
+# Backend
+**/*.pyc
+**/.env
+
+## Will be built by multistage docker build
+**/static
+
+# Frontend
+**/node_modules
