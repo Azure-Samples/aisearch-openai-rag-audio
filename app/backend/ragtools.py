@@ -48,33 +48,41 @@ _grounding_tool_schema = {
     }
 }
 
-async def _search_tool(search_client: SearchClient, args: Any) -> ToolResult:
+async def _search_tool(
+    search_client: SearchClient, 
+    semantic_configuration: str,
+    identifier_field: str,
+    : str,
+    args: Any) -> ToolResult:
     print(f"Searching for '{args['query']}' in the knowledge base.")
     # Hybrid + Reranking query using Azure AI Search
     search_results = await search_client.search(
         search_text=args['query'], 
         query_type="semantic",
+        semantic_configuration_name=semantic_configuration,
+        # semantic_query=args['query'], # Uncomment this line to use the semantic query
         top=5,
         vector_queries=[VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields="text_vector")],
-        select="chunk_id,title,chunk")
+        select=", ".join([identifier_field, content_field])
+    )
     result = ""
     async for r in search_results:
-        result += f"[{r['chunk_id']}]: {r['chunk']}\n-----\n"
+        result += f"[{r[identifier_field]}]: {r[content_field]}\n-----\n"
     return ToolResult(result, ToolResultDirection.TO_SERVER)
 
 KEY_PATTERN = re.compile(r'^[a-zA-Z0-9_=\-]+$')
 
 # TODO: move from sending all chunks used for grounding eagerly to only sending links to 
 # the original content in storage, it'll be more efficient overall
-async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None:
+async def _report_grounding_tool(search_client: SearchClient, identifier_field: str, title_field: str, content_field: str, args: Any) -> None:
     sources = [s for s in args["sources"] if KEY_PATTERN.match(s)]
     list = " OR ".join(sources)
     print(f"Grounding source: {list}")
     # Use search instead of filter to align with how detailt integrated vectorization indexes
     # are generated, where chunk_id is searchable with a keyword tokenizer, not filterable 
     search_results = await search_client.search(search_text=list, 
-                                                search_fields=["chunk_id"], 
-                                                select=["chunk_id", "title", "chunk"], 
+                                                search_fields=[identifier_field], 
+                                                select=[identifier_field, title_field, content_field], 
                                                 top=len(sources), 
                                                 query_type="full")
     
@@ -84,13 +92,20 @@ async def _report_grounding_tool(search_client: SearchClient, args: Any) -> None
 
     docs = []
     async for r in search_results:
-        docs.append({"chunk_id": r['chunk_id'], "title": r["title"], "chunk": r['chunk']})
+        docs.append({"chunk_id": r[identifier_field], "title": r[title_field], "chunk": r[content_field]})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
-def attach_rag_tools(rtmt: RTMiddleTier, search_endpoint: str, search_index: str, credentials: AzureKeyCredential | DefaultAzureCredential) -> None:
+def attach_rag_tools(rtmt: RTMiddleTier,
+    credentials: AzureKeyCredential | DefaultAzureCredential,
+    search_endpoint: str, search_index: str,
+    semantic_configuration: str,
+    identifier_field: str,
+    content_field: str,
+    title_field: str
+    ) -> None:
     if not isinstance(credentials, AzureKeyCredential):
         credentials.get_token("https://search.azure.com/.default") # warm this up before we start getting requests
     search_client = SearchClient(search_endpoint, search_index, credentials, user_agent="RTMiddleTier")
 
-    rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, args))
-    rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, args))
+    rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, semantic_configuration, identifier_field, content_field, args))
+    rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, identifier_field, title_field, content_field, args))
