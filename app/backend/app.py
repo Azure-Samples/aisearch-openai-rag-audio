@@ -8,6 +8,8 @@ from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 
 
+
+
 if __name__ == "__main__":
     load_dotenv()
     llm_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -16,12 +18,21 @@ if __name__ == "__main__":
     search_endpoint = os.environ.get("AZURE_SEARCH_ENDPOINT")
     search_index = os.environ.get("AZURE_SEARCH_INDEX")
     search_key = os.environ.get("AZURE_SEARCH_API_KEY")
+    voice_choice = os.environ.get("VOICE_CHOICE")
 
     credentials = DefaultAzureCredential() if not llm_key or not search_key else None
 
     app = web.Application()
 
-    rtmt = RTMiddleTier(llm_endpoint, llm_deployment, AzureKeyCredential(llm_key) if llm_key else credentials)
+    rtmt_config = {
+    "endpoint": llm_endpoint,
+    "deployment": llm_deployment,
+    "credentials": AzureKeyCredential(llm_key) if llm_key else credentials
+    }
+    if voice_choice:
+        rtmt_config["voice_choice"] = voice_choice
+
+    rtmt = RTMiddleTier(**rtmt_config)
     rtmt.system_message = "You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. " + \
                           "The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. " + \
                           "Never read file names or source names or keys out loud. " + \

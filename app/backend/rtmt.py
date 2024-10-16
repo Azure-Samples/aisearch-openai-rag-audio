@@ -56,13 +56,16 @@ class RTMiddleTier:
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
     disable_audio: Optional[bool] = None
+    voice_choice: Optional[str] = None
+    api_version: str = "2024-10-01-preview"
 
     _tools_pending = {}
     _token_provider = None
 
-    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential):
+    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None):
         self.endpoint = endpoint
         self.deployment = deployment
+        self.voice_choice = voice_choice
         if isinstance(credentials, AzureKeyCredential):
             self.key = credentials.key
         else:
@@ -169,7 +172,7 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": "2024-10-01-preview", "deployment": self.deployment, "voice" : "nova" }
+            params = { "api-version": self.api_version, "deployment": self.deployment, "voice" : self.voice_choice }
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
