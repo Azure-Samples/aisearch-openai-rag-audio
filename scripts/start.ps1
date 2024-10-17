@@ -3,7 +3,7 @@
 Write-Host ""
 Write-Host "Restoring frontend npm packages"
 Write-Host ""
-Set-Location ../frontend
+Set-Location ./app/frontend
 npm install
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to restore frontend npm packages"
