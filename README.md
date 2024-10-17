@@ -5,6 +5,15 @@
 
 This repo contains an example of how to implement RAG support in applications that use voice as their user interface, powered by the GPT-4o realtime API for audio. We describe the pattern in more detail in [this blog post](https://aka.ms/voicerag), and you can see this sample app in action in [this short video](https://youtu.be/vXJka8xZ9Ko).
 
+* [Features](#features)
+* [Architecture Diagram](#architecture-diagram)
+* [Getting Started](#getting-started)
+  * [GitHub Codespaces](#github-codespaces)
+  * [VS Code Dev Containers](#vs-code-dev-containers)
+  * [Local environment](#local-environment)
+* [Deploying the app](#deploying-the-app)
+* [Development server](#development-server)
+
 ## Features
 
 * **Voice interface**: The app uses the browser's microphone to capture voice input, and sends it to the backend where it is processed by the Azure OpenAI GPT-4o Realtime API.
@@ -81,6 +90,8 @@ The steps below will provision Azure resources and deploy the application code t
     Enter a name that will be used for the resource group.
     This will create a new folder in the `.azure` folder, and set it as the active environment for any calls to `azd` going forward.
 
+1. (Optional) If you want to re-use any existing resources, follow [these instructions](docs/existing_services.md) to set the appropriate `azd` environment variables.
+
 1. Run this single command to provision the resources, deploy the code, and setup integrated vectorization for the sample data:
 
    ```shell
@@ -92,9 +103,9 @@ The steps below will provision Azure resources and deploy the application code t
 
 1. After the application has been successfully deployed you will see a URL printed to the console.  Click that URL to interact with the application in your browser. You can also now run the app locally by following the instructions in the next section.
 
-## Running the app locally
+## Development server
 
-You can run this app locally using either the Azure services you provisioned by following the [deployment instructions](#deploying-the-app), or by pointing the local app at already existing services.
+You can run this app locally using either the Azure services you provisioned by following the [deployment instructions](#deploying-the-app), or by pointing the local app at already [existing services](docs/existing_services.md).
 
 1. If you deployed with `azd up`, you should see a `app/backend/.env` file with the necessary environment variables.
 

@@ -117,11 +117,11 @@ def setup_index(azure_credential, index_name, azure_search_endpoint, azure_stora
                 semantic_search=SemanticSearch(
                     configurations=[
                         SemanticConfiguration(
-                            name="semsearch",
+                            name="default",
                             prioritized_fields=SemanticPrioritizedFields(title_field=SemanticField(field_name="title"), content_fields=[SemanticField(field_name="chunk")])
                         )
                     ],
-                    default_configuration_name="semsearch"
+                    default_configuration_name="default"
                 )
             )
         )

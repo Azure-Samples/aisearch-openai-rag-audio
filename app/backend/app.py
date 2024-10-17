@@ -48,9 +48,11 @@ async def create_app():
         search_endpoint=os.environ.get("AZURE_SEARCH_ENDPOINT"),
         search_index=os.environ.get("AZURE_SEARCH_INDEX"),
         semantic_configuration=os.environ.get("AZURE_SEARCH_SEMANTIC_CONFIGURATION") or "default",
-        identifier_field=os.environ.get("AZURE_SEARCH_FIELD_IDENTIFIER") or "chunk_id",
-        content_field=os.environ.get("AZURE_SEARCH_FIELD_CONTENT") or "chunk",
-        title_field=os.environ.get("AZURE_SEARCH_FIELD_TITLE") or "title"
+        identifier_field=os.environ.get("AZURE_SEARCH_IDENTIFIER_FIELD") or "chunk_id",
+        content_field=os.environ.get("AZURE_SEARCH_CONTENT_FIELD") or "chunk",
+        embedding_field=os.environ.get("AZURE_SEARCH_EMBEDDING_FIELD") or "text_vector",
+        title_field=os.environ.get("AZURE_SEARCH_TITLE_FIELD") or "title",
+        use_vector_query=(os.environ.get("AZURE_SEARCH_USE_VECTOR_QUERY") == "true") or True
         )
 
     rtmt.attach_to_app(app, "/realtime")
