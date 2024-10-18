@@ -14,5 +14,14 @@ export default defineConfig({
         alias: {
             "@": path.resolve(__dirname, "./src")
         }
+    },
+    server: {
+        proxy: {
+            "/realtime": {
+                target: "ws://localhost:8765",
+                ws: true,
+                rewriteWsOrigin: true
+            }
+        }
     }
 });
