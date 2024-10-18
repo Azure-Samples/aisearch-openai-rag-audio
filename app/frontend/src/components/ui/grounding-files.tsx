@@ -30,11 +30,11 @@ const variants: Variants = {
 
 export function GroundingFiles({ files, onSelected }: Properties) {
     const { t } = useTranslation();
+    const isAnimating = useRef(false);
+
     if (files.length === 0) {
         return null;
     }
-
-    const isAnimating = useRef(false);
 
     return (
         <Card className="m-4 max-w-full md:max-w-md lg:min-w-96 lg:max-w-2xl">
