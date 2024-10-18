@@ -1,0 +1,21 @@
+{
+    "app": {
+        "title": "Talk to your data",
+        "footer": "Built with Azure AI Search + Azure OpenAI",
+        "stopRecording": "Stop recording",
+        "startRecording": "Start recording",
+        "stopConversation": "Stop conversation"
+    },
+    "status": {
+        "notRecordingMessage": "Ask anything about Contoso employee benefits",
+        "conversationInProgress": "Conversation in progress"
+    },
+    "history": {
+        "answerHistory": "Answer history",
+        "noHistory": "No history yet."
+    },
+    "groundingFiles": {
+        "title": "Grounding files",
+        "description": "Files used to ground the answers."
+    }
+}
