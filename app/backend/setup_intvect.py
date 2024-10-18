@@ -117,11 +117,11 @@ def setup_index(azure_credential, index_name, azure_search_endpoint, azure_stora
                 semantic_search=SemanticSearch(
                     configurations=[
                         SemanticConfiguration(
-                            name="semsearch",
+                            name="default",
                             prioritized_fields=SemanticPrioritizedFields(title_field=SemanticField(field_name="title"), content_fields=[SemanticField(field_name="chunk")])
                         )
                     ],
-                    default_configuration_name="semsearch"
+                    default_configuration_name="default"
                 )
             )
         )
@@ -222,6 +222,13 @@ if __name__ == "__main__":
     logger = logging.getLogger("voicerag")
 
     load_azd_env()
+
+    logger.info("Checking if we need to set up Azure AI Search index...")
+    if os.environ.get("AZURE_SEARCH_REUSE_EXISTING") == "true":
+        logger.info("Since an existing Azure AI Search index is being used, no changes will be made to the index.")
+        exit()
+    else:
+        logger.info("Setting up Azure AI Search index and integrated vectorization...")
 
     # Used to name index, indexer, data source and skillset
     AZURE_SEARCH_INDEX = os.environ["AZURE_SEARCH_INDEX"]

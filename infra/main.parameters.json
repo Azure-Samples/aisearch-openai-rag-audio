@@ -20,8 +20,35 @@
     "openAiResourceGroupName": {
       "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
     },
+    "reuseExistingOpenAi": {
+      "value": "${AZURE_OPENAI_REUSE_EXISTING=false}"
+    },
+    "openAiEndpoint": {
+      "value": "${AZURE_OPENAI_ENDPOINT}"
+    },
+    "openAiRealtimeDeployment": {
+      "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT}"
+    },
     "searchIndexName": {
       "value": "${AZURE_SEARCH_INDEX=voicerag-intvect}"
+    },
+    "searchSemanticConfiguration":{
+      "value": "${AZURE_SEARCH_SEMANTIC_CONFIGURATION=default}"
+    },
+    "searchIdentifierField": {
+      "value": "${AZURE_SEARCH_IDENTIFIER_FIELD=chunk_id}"
+    },
+    "searchContentField": {
+      "value": "${AZURE_SEARCH_CONTENT_FIELD=chunk}"
+    },
+    "searchTitleField": {
+      "value": "${AZURE_SEARCH_TITLE_FIELD=title}"
+    },
+    "searchEmbeddingField": {
+      "value": "${AZURE_SEARCH_EMBEDDING_FIELD=text_vector}"
+    },
+    "searchUseVectorQuery": {
+      "value": "${AZURE_SEARCH_USE_VECTOR_QUERY=true}"
     },
     "searchServiceName": {
       "value": "${AZURE_SEARCH_SERVICE}"
@@ -37,6 +64,12 @@
     },
     "searchServiceSemanticRankerLevel": {
       "value": "${AZURE_SEARCH_SEMANTIC_RANKER=free}"
+    },
+    "reuseExistingSearch": {
+      "value": "${AZURE_SEARCH_REUSE_EXISTING=false}"
+    },
+    "searchEndpoint": {
+      "value": "${AZURE_SEARCH_ENDPOINT}"
     },
     "storageAccountName": {
       "value": "${AZURE_STORAGE_ACCOUNT}"

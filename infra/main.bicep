@@ -37,31 +37,42 @@ param environmentName string
 })
 param location string
 
-param backendServiceName string = '' // Set in main.parameters.json
-param resourceGroupName string = '' // Set in main.parameters.json
+param backendServiceName string = ''
+param resourceGroupName string = ''
 
-param logAnalyticsName string = '' // Set in main.parameters.json
+param logAnalyticsName string = ''
 
-param searchServiceName string = '' // Set in main.parameters.json
-param searchServiceResourceGroupName string = '' // Set in main.parameters.json
-param searchServiceLocation string = '' // Set in main.parameters.json
+param reuseExistingSearch bool
+param searchEndpoint string = ''
+param searchServiceName string = ''
+param searchServiceResourceGroupName string = ''
+param searchServiceLocation string = ''
 // The free tier does not support managed identity (required) or semantic search (optional)
 @allowed(['free', 'basic', 'standard', 'standard2', 'standard3', 'storage_optimized_l1', 'storage_optimized_l2'])
-param searchServiceSkuName string // Set in main.parameters.json
-param searchIndexName string // Set in main.parameters.json
-param searchServiceSemanticRankerLevel string // Set in main.parameters.json
+param searchServiceSkuName string
+param searchIndexName string
+param searchSemanticConfiguration string
+param searchServiceSemanticRankerLevel string
 var actualSearchServiceSemanticRankerLevel = (searchServiceSkuName == 'free')
   ? 'disabled'
   : searchServiceSemanticRankerLevel
+param searchIdentifierField string
+param searchContentField string
+param searchTitleField string
+param searchEmbeddingField string
+param searchUseVectorQuery bool
 
-param storageAccountName string = '' // Set in main.parameters.json
-param storageResourceGroupName string = '' // Set in main.parameters.json
+param storageAccountName string = ''
+param storageResourceGroupName string = ''
 param storageResourceGroupLocation string = location
 param storageContainerName string = 'content'
-param storageSkuName string // Set in main.parameters.json
+param storageSkuName string
 
+param reuseExistingOpenAi bool = false
 param openAiServiceName string = ''
 param openAiResourceGroupName string = ''
+param openAiEndpoint string = ''
+param openAiRealtimeDeployment string = ''
 
 @description('Location for the OpenAI resource group')
 @allowed([
@@ -75,8 +86,8 @@ param openAiResourceGroupName string = ''
 })
 param openAiResourceLocation string
 
-param realtimeDeploymentCapacity int // Set in main.parameters.json
-param embeddingDeploymentCapacity int // Set in main.parameters.json
+param realtimeDeploymentCapacity int
+param embeddingDeploymentCapacity int
 
 param tenantId string = tenant().tenantId
 
@@ -100,7 +111,6 @@ param webAppExists bool
 param azureContainerAppsWorkloadProfile string
 
 param acaIdentityName string = '${environmentName}-aca-identity'
-param acaManagedEnvironmentName string = '${environmentName}-aca-env'
 param containerRegistryName string = '${replace(environmentName, '-', '')}acr'
 
 // Figure out if we're running as a user or service principal
@@ -125,7 +135,7 @@ resource storageResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' ex
   name: !empty(storageResourceGroupName) ? storageResourceGroupName : resourceGroup.name
 }
 
-module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.4.0' = {
+module logAnalytics 'br/public:avm/res/operational-insights/workspace:0.7.0' = {
   name: 'loganalytics'
   scope: resourceGroup
   params: {
@@ -160,7 +170,7 @@ module containerApps 'core/host/container-apps.bicep' = {
     tags: tags
     location: location
     workloadProfile: azureContainerAppsWorkloadProfile
-    containerAppsEnvironmentName: acaManagedEnvironmentName
+    containerAppsEnvironmentName: '${environmentName}-aca-env'
     containerRegistryName: '${containerRegistryName}${resourceToken}'
     logAnalyticsWorkspaceResourceId: logAnalytics.outputs.resourceId
   }
@@ -188,10 +198,18 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
     containerCpuCoreCount: '1.0'
     containerMemory: '2Gi'
     env: {
-      AZURE_SEARCH_ENDPOINT: 'https://${searchService.outputs.name}.search.windows.net/'
+      AZURE_SEARCH_ENDPOINT: reuseExistingSearch
+        ? searchEndpoint
+        : 'https://${searchService.outputs.name}.search.windows.net'
       AZURE_SEARCH_INDEX: searchIndexName
-      AZURE_OPENAI_ENDPOINT: openAi.outputs.endpoint
-      AZURE_OPENAI_REALTIME_DEPLOYMENT: openAiDeployments[0].name
+      AZURE_SEARCH_SEMANTIC_CONFIGURATION: searchSemanticConfiguration
+      AZURE_SEARCH_IDENTIFIER_FIELD: searchIdentifierField
+      AZURE_SEARCH_CONTENT_FIELD: searchContentField
+      AZURE_SEARCH_TITLE_FIELD: searchTitleField
+      AZURE_SEARCH_EMBEDDING_FIELD: searchEmbeddingField
+      AZURE_SEARCH_USE_VECTOR_QUERY: searchUseVectorQuery
+      AZURE_OPENAI_ENDPOINT: reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
+      AZURE_OPENAI_REALTIME_DEPLOYMENT: reuseExistingOpenAi ? openAiRealtimeDeployment : openAiDeployments[0].name
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
       // For using managed identity to access Azure resources. See https://github.com/microsoft/azure-container-apps/issues/442
@@ -228,7 +246,7 @@ var openAiDeployments = [
   }
 ]
 
-module openAi 'br/public:avm/res/cognitive-services/account:0.5.4' = {
+module openAi 'br/public:avm/res/cognitive-services/account:0.8.0' = if (!reuseExistingOpenAi) {
   name: 'openai'
   scope: openAiResourceGroup
   params: {
@@ -254,7 +272,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.5.4' = {
   }
 }
 
-module searchService 'br/public:avm/res/search/search-service:0.7.1' = {
+module searchService 'br/public:avm/res/search/search-service:0.7.1' = if (!reuseExistingSearch) {
   name: 'search-service'
   scope: searchServiceResourceGroup
   params: {
@@ -353,21 +371,23 @@ module searchRoleBackend 'core/security/role.bicep' = {
   }
 }
 
-module storageRoleSearchService 'core/security/role.bicep' = {
+// Necessary for integrated vectorization, for search service to access storage
+module storageRoleSearchService 'core/security/role.bicep' = if (!reuseExistingSearch) {
   scope: storageResourceGroup
   name: 'storage-role-searchservice'
   params: {
-    principalId: searchService.outputs.systemAssignedMIPrincipalId
+    principalId: !reuseExistingSearch ? searchService.outputs.systemAssignedMIPrincipalId : ''
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' // Storage Blob Data Reader
     principalType: 'ServicePrincipal'
   }
 }
 
-module openAiRoleSearchService 'core/security/role.bicep' = {
+// Necessary for integrated vectorization, for search service to access OpenAI embeddings
+module openAiRoleSearchService 'core/security/role.bicep' = if (!reuseExistingSearch) {
   scope: openAiResourceGroup
   name: 'openai-role-searchservice'
   params: {
-    principalId: searchService.outputs.systemAssignedMIPrincipalId
+    principalId: !reuseExistingSearch ? searchService.outputs.systemAssignedMIPrincipalId : ''
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: 'ServicePrincipal'
   }
@@ -377,13 +397,23 @@ output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
-output AZURE_OPENAI_ENDPOINT string = openAi.outputs.endpoint
-output AZURE_OPENAI_REALTIME_DEPLOYMENT string = openAiDeployments[0].name
+output AZURE_OPENAI_ENDPOINT string = reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
+output AZURE_OPENAI_REALTIME_DEPLOYMENT string = reuseExistingOpenAi
+  ? openAiRealtimeDeployment
+  : openAiDeployments[0].name
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT string = embedModel
 output AZURE_OPENAI_EMBEDDING_MODEL string = embedModel
 
-output AZURE_SEARCH_ENDPOINT string = 'https://${searchService.outputs.name}.search.windows.net'
+output AZURE_SEARCH_ENDPOINT string = reuseExistingSearch
+  ? searchEndpoint
+  : 'https://${searchService.outputs.name}.search.windows.net'
 output AZURE_SEARCH_INDEX string = searchIndexName
+output AZURE_SEARCH_SEMANTIC_CONFIGURATION string = searchSemanticConfiguration
+output AZURE_SEARCH_IDENTIFIER_FIELD string = searchIdentifierField
+output AZURE_SEARCH_CONTENT_FIELD string = searchContentField
+output AZURE_SEARCH_TITLE_FIELD string = searchTitleField
+output AZURE_SEARCH_EMBEDDING_FIELD string = searchEmbeddingField
+output AZURE_SEARCH_USE_VECTOR_QUERY bool = searchUseVectorQuery
 
 output AZURE_STORAGE_ENDPOINT string = 'https://${storage.outputs.name}.blob.core.windows.net'
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
