@@ -98,7 +98,6 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
     docs = []
     async for r in search_results:
         docs.append({"chunk_id": r[identifier_field], "title": r[title_field], "chunk": r[content_field]})
-    print (f"Grounding source: {docs}")
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
 def attach_rag_tools(rtmt: RTMiddleTier,

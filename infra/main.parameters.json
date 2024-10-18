@@ -39,13 +39,13 @@
       "value": "${AZURE_SEARCH_IDENTIFIER_FIELD=chunk_id}"
     },
     "searchContentField": {
-      "value": "${AZURE_SEARCH_CONTENT_FIELD=content}"
+      "value": "${AZURE_SEARCH_CONTENT_FIELD=chunk}"
     },
     "searchTitleField": {
       "value": "${AZURE_SEARCH_TITLE_FIELD=title}"
     },
     "searchEmbeddingField": {
-      "value": "${AZURE_SEARCH_EMBEDDING_FIELD=embedding}"
+      "value": "${AZURE_SEARCH_EMBEDDING_FIELD=text_vector}"
     },
     "searchUseVectorQuery": {
       "value": "${AZURE_SEARCH_USE_VECTOR_QUERY=true}"

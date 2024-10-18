@@ -41,7 +41,7 @@ You can run this repo virtually by using GitHub Codespaces, which will open a we
 
 Once the codespace opens (this may take several minutes), open a new terminal and proceed to [deploy the app](#deploying-the-app).
 
-#### VS Code Dev Containers
+### VS Code Dev Containers
 
 You can run the project in your local VS Code Dev Container using the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
 
@@ -51,7 +51,7 @@ You can run the project in your local VS Code Dev Container using the [Dev Conta
     [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/aisearch-openai-rag-audio)
 3. In the VS Code window that opens, once the project files show up (this may take several minutes), open a new terminal, and proceed to [deploying the app](#deploying-the-app).
 
-#### Local environment
+### Local environment
 
 1. Install the required tools:
    * [Azure Developer CLI](https://aka.ms/azure-dev/install)
@@ -101,7 +101,7 @@ The steps below will provision Azure resources and deploy the application code t
    * **Important**: Beware that the resources created by this command will incur immediate costs, primarily from the AI Search resource. These resources may accrue costs even if you interrupt the command before it is fully executed. You can run `azd down` or delete the resources manually to avoid unnecessary spending.
    * You will be prompted to select two locations, one for the majority of resources and one for the OpenAI resource, which is currently a short list. That location list is based on the [OpenAI model availability table](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#global-standard-model-availability) and may become outdated as availability changes.
 
-1. After the application has been successfully deployed you will see a URL printed to the console.  Click that URL to interact with the application in your browser. You can also now run the app locally by following the instructions in the next section.
+1. After the application has been successfully deployed you will see a URL printed to the console.  Navigate to that URL to interact with the app in your browser. To try out the app, click the "Start conversation button", say "Hello", and then ask a question about your data like "What is the whistleblower policy for Contoso electronics?" You can also now run the app locally by following the instructions in [the next section](#development-server).
 
 ## Development server
 
@@ -109,7 +109,7 @@ You can run this app locally using either the Azure services you provisioned by 
 
 1. If you deployed with `azd up`, you should see a `app/backend/.env` file with the necessary environment variables.
 
-2. If you are using existing services, you will need to create `app/backend/.env` file with the following environment variables:
+2. If did *not* use `azd up`, you will need to create `app/backend/.env` file with the following environment variables:
 
    ```shell
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
@@ -138,8 +138,10 @@ You can run this app locally using either the Azure services you provisioned by 
 
 4. The app is available on [http://localhost:8765](http://localhost:8765).
 
-Once the app is running, when you navigate to the URL above you should see the start screen of the app:
-![app screenshot](docs/talktoyourdataapp.png)
+   Once the app is running, when you navigate to the URL above you should see the start screen of the app:
+   ![app screenshot](docs/talktoyourdataapp.png)
+
+   To try out the app, click the "Start conversation button", say "Hello", and then ask a question about your data like "What is the whistleblower policy for Contoso electronics?"
 
 ## Guidance
 
