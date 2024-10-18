@@ -16,6 +16,6 @@
     },
     "groundingFiles": {
         "title": "Fichiers de fondement",
-        "description": "Fichiers utilisés pour fonder les réponses."
+        "description": "Fichiers utilisés pour ancrer les réponses."
     }
 }
