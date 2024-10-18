@@ -223,6 +223,13 @@ if __name__ == "__main__":
 
     load_azd_env()
 
+    logger.info("Checking if we need to set up Azure AI Search index...")
+    if os.environ.get("AZURE_SEARCH_REUSE_EXISTING") == "true":
+        logger.info("Since an existing Azure AI Search index is being used, no changes will be made to the index.")
+        exit()
+    else:
+        logger.info("Setting up Azure AI Search index and integrated vectorization...")
+
     # Used to name index, indexer, data source and skillset
     AZURE_SEARCH_INDEX = os.environ["AZURE_SEARCH_INDEX"]
     AZURE_OPENAI_EMBEDDING_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"]

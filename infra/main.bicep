@@ -74,7 +74,6 @@ param openAiResourceGroupName string = ''
 param openAiEndpoint string = ''
 param openAiRealtimeDeployment string = ''
 
-
 @description('Location for the OpenAI resource group')
 @allowed([
   'eastus2'
@@ -199,7 +198,9 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
     containerCpuCoreCount: '1.0'
     containerMemory: '2Gi'
     env: {
-      AZURE_SEARCH_ENDPOINT: reuseExistingSearch ? searchEndpoint : 'https://${searchService.outputs.name}.search.windows.net'
+      AZURE_SEARCH_ENDPOINT: reuseExistingSearch
+        ? searchEndpoint
+        : 'https://${searchService.outputs.name}.search.windows.net'
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SEMANTIC_CONFIGURATION: searchSemanticConfiguration
       AZURE_SEARCH_IDENTIFIER_FIELD: searchIdentifierField
@@ -208,7 +209,7 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
       AZURE_SEARCH_EMBEDDING_FIELD: searchEmbeddingField
       AZURE_SEARCH_USE_VECTOR_QUERY: searchUseVectorQuery
       AZURE_OPENAI_ENDPOINT: reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
-      AZURE_OPENAI_REALTIME_DEPLOYMENT: reuseExistingOpenAi ?  openAiRealtimeDeployment : openAiDeployments[0].name
+      AZURE_OPENAI_REALTIME_DEPLOYMENT: reuseExistingOpenAi ? openAiRealtimeDeployment : openAiDeployments[0].name
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
       // For using managed identity to access Azure resources. See https://github.com/microsoft/azure-container-apps/issues/442
@@ -397,11 +398,15 @@ output AZURE_TENANT_ID string = tenantId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 
 output AZURE_OPENAI_ENDPOINT string = reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
-output AZURE_OPENAI_REALTIME_DEPLOYMENT string = reuseExistingOpenAi ? openAiRealtimeDeployment : openAiDeployments[0].name
+output AZURE_OPENAI_REALTIME_DEPLOYMENT string = reuseExistingOpenAi
+  ? openAiRealtimeDeployment
+  : openAiDeployments[0].name
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT string = embedModel
 output AZURE_OPENAI_EMBEDDING_MODEL string = embedModel
 
-output AZURE_SEARCH_ENDPOINT string = reuseExistingSearch ? searchEndpoint : 'https://${searchService.outputs.name}.search.windows.net'
+output AZURE_SEARCH_ENDPOINT string = reuseExistingSearch
+  ? searchEndpoint
+  : 'https://${searchService.outputs.name}.search.windows.net'
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SEMANTIC_CONFIGURATION string = searchSemanticConfiguration
 output AZURE_SEARCH_IDENTIFIER_FIELD string = searchIdentifierField
