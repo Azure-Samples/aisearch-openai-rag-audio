@@ -25,7 +25,7 @@ echo ""
 echo "Starting backend"
 echo ""
 cd ../../
-./.venv/bin/python app/backend/app.py --reload
+./.venv/bin/python app/backend/app.py
 if [ $? -ne 0 ]; then
     echo "Failed to start backend"
     exit $?

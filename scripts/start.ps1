@@ -29,7 +29,7 @@ if (Test-Path -Path "/usr") {
   # fallback to Linux venv path
   $venvPythonPath = "./.venv/bin/python"
 }
-Start-Process -FilePath $venvPythonPath -ArgumentList "-m app --reload" -Wait -NoNewWindow
+Start-Process -FilePath $venvPythonPath -ArgumentList "-m app" -Wait -NoNewWindow
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to start backend"
     exit $LASTEXITCODE
