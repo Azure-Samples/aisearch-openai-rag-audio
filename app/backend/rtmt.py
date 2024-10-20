@@ -187,6 +187,11 @@ class RTMiddleTier:
                         else:
                             print("Error: unexpected message type:", msg.type)
 
+                # Means it is gracefully closed by the client then time to close the target_ws
+                if target_ws:
+                    print("Closing OpenAI's realtime socket connection.")
+                    await target_ws.close()
+                        
                 async def from_server_to_client():
                     async for msg in target_ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
