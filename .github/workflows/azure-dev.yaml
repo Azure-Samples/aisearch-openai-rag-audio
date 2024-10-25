@@ -10,7 +10,7 @@ on:
   pull_request:
 
 # GitHub Actions workflow to deploy to Azure using azd
-# To configure required secrets for connecting to Azure, simply run `azd pipeline config`
+# To configure required secrets for connecting to Azure, run `azd pipeline config`
 
 # Set up permissions for deploying with secretless Azure federated credentials
 # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#set-up-azure-login-with-openid-connect-authentication
