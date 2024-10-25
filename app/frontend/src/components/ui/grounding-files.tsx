@@ -5,6 +5,7 @@ import { GroundingFile as GroundingFileType } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 import GroundingFile from "./grounding-file";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 type Properties = {
     files: GroundingFileType[];
@@ -28,17 +29,18 @@ const variants: Variants = {
 };
 
 export function GroundingFiles({ files, onSelected }: Properties) {
+    const { t } = useTranslation();
+    const isAnimating = useRef(false);
+
     if (files.length === 0) {
         return null;
     }
 
-    const isAnimating = useRef(false);
-
     return (
         <Card className="m-4 max-w-full md:max-w-md lg:min-w-96 lg:max-w-2xl">
             <CardHeader>
-                <CardTitle className="text-xl">Grounding files</CardTitle>
-                <CardDescription>Files used to ground the answers.</CardDescription>
+                <CardTitle className="text-xl">{t("groundingFiles.title")}</CardTitle>
+                <CardDescription>{t("groundingFiles.description")}</CardDescription>
             </CardHeader>
             <CardContent>
                 <AnimatePresence>

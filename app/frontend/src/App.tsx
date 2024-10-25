@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mic, MicOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
@@ -34,9 +35,7 @@ function App() {
             const result: ToolResult = JSON.parse(message.tool_result);
 
             const files: GroundingFile[] = result.sources.map(x => {
-                const match = x.chunk_id.match(/_pages_(\d+)$/);
-                const name = match ? `${x.title}#page=${match[1]}` : x.title;
-                return { id: x.chunk_id, name: name, content: x.chunk };
+                return { id: x.chunk_id, name: x.title, content: x.chunk };
             });
 
             setGroundingFiles(prev => [...prev, ...files]);
@@ -62,6 +61,8 @@ function App() {
         }
     };
 
+    const { t } = useTranslation();
+
     return (
         <div className="flex min-h-screen flex-col bg-gray-100 text-gray-900">
             <div className="p-4 sm:absolute sm:left-4 sm:top-4">
@@ -69,18 +70,18 @@ function App() {
             </div>
             <main className="flex flex-grow flex-col items-center justify-center">
                 <h1 className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent md:text-7xl">
-                    Talk to your data
+                    {t("app.title")}
                 </h1>
                 <div className="mb-4 flex flex-col items-center justify-center">
                     <Button
                         onClick={onToggleListening}
                         className={`h-12 w-60 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-purple-500 hover:bg-purple-600"}`}
-                        aria-label={isRecording ? "Stop recording" : "Start recording"}
+                        aria-label={isRecording ? t("app.stopRecording") : t("app.startRecording")}
                     >
                         {isRecording ? (
                             <>
                                 <MicOff className="mr-2 h-4 w-4" />
-                                Stop conversation
+                                {t("app.stopConversation")}
                             </>
                         ) : (
                             <>
@@ -94,7 +95,7 @@ function App() {
             </main>
 
             <footer className="py-4 text-center">
-                <p>Built with Azure AI Search + Azure OpenAI</p>
+                <p>{t("app.footer")}</p>
             </footer>
 
             <GroundingFileView groundingFile={selectedFile} onClosed={() => setSelectedFile(null)} />

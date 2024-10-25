@@ -1,11 +1,13 @@
-import aiohttp
 import asyncio
 import json
 from enum import Enum
 from typing import Any, Callable, Optional
+
+import aiohttp
 from aiohttp import web
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+
 
 class ToolResultDirection(Enum):
     TO_SERVER = 1

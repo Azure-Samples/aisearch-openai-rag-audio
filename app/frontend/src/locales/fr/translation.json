@@ -1,0 +1,21 @@
+{
+    "app": {
+        "title": "Parlez à vos données",
+        "footer": "Créée avec Azure AI Search + Azure OpenAI",
+        "stopRecording": "Arrêter l'enregistrement",
+        "startRecording": "Commencer l'enregistrement",
+        "stopConversation": "Arrêter la conversation"
+    },
+    "status": {
+        "notRecordingMessage": "Posez des questions sur les avantages sociaux des employés de Contoso",
+        "conversationInProgress": "Conversation en cours"
+    },
+    "history": {
+        "answerHistory": "Historique des réponses",
+        "noHistory": "Pas encore d'historique."
+    },
+    "groundingFiles": {
+        "title": "Fichiers d'ancrage",
+        "description": "Fichiers utilisés pour ancrer les réponses."
+    }
+}
