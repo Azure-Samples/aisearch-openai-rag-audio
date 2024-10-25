@@ -17,9 +17,7 @@ async def create_app():
     if not os.environ.get("RUNNING_IN_PRODUCTION"):
         logger.info("Running in development mode, loading from .env file")
         load_dotenv()
-    llm_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    llm_deployment = os.environ.get("AZURE_OPENAI_REALTIME_DEPLOYMENT")
-    llm_voice_choice = os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE", "alloy")
+
     llm_key = os.environ.get("AZURE_OPENAI_API_KEY")
     search_key = os.environ.get("AZURE_SEARCH_API_KEY")
 
@@ -38,9 +36,9 @@ async def create_app():
 
     rtmt = RTMiddleTier(
         credentials=llm_credential,
-        endpoint=llm_endpoint,
-        deployment=llm_deployment,
-        voice_choice=llm_voice_choice
+        endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+        deployment=os.environ["AZURE_OPENAI_REALTIME_DEPLOYMENT"],
+        voice_choice=os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE") or "alloy"
         )
     rtmt.system_message = "You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. " + \
                           "The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. " + \
