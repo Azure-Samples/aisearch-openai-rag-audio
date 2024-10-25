@@ -9,9 +9,6 @@ on:
       - main
       - newdocs
   pull_request:
-    # Run when pull requests are opened or updated
-    branches:
-      - main
 
 # GitHub Actions workflow to deploy to Azure using azd
 # To configure required secrets for connecting to Azure, simply run `azd pipeline config`
