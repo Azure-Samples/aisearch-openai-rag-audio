@@ -1,0 +1,85 @@
+name: Deploy to Azure with azd
+
+on:
+  workflow_dispatch:
+  push:
+    # Run when commits are pushed to mainline branch
+    branches:
+      - main
+  pull_request:
+
+# GitHub Actions workflow to deploy to Azure using azd
+# To configure required secrets for connecting to Azure, run `azd pipeline config`
+
+# Set up permissions for deploying with secretless Azure federated credentials
+# https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#set-up-azure-login-with-openid-connect-authentication
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # azd required
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      # project specific (matches main.parameters.json)
+      AZURE_OPENAI_SERVICE: ${{ vars.AZURE_OPENAI_SERVICE }}
+      AZURE_OPENAI_RESOURCE_GROUP: ${{ vars.AZURE_OPENAI_RESOURCE_GROUP }}
+      AZURE_OPENAI_REUSE_EXISTING: ${{ vars.AZURE_OPENAI_REUSE_EXISTING }}
+      AZURE_OPENAI_ENDPOINT: ${{ vars.AZURE_OPENAI_ENDPOINT }}
+      AZURE_OPENAI_REALTIME_DEPLOYMENT: ${{ vars.AZURE_OPENAI_REALTIME_DEPLOYMENT }}
+      AZURE_OPENAI_REALTIME_DEPLOYMENT_CAPACITY: ${{ vars.AZURE_OPENAI_REALTIME_DEPLOYMENT_CAPACITY }}
+      AZURE_OPENAI_EMB_DEPLOYMENT_CAPACITY: ${{ vars.AZURE_OPENAI_EMB_DEPLOYMENT_CAPACITY }}
+      AZURE_OPENAI_EMB_DIMENSIONS: ${{ vars.AZURE_OPENAI_EMB_DIMENSIONS }}
+      AZURE_SEARCH_INDEX: ${{ vars.AZURE_SEARCH_INDEX }}
+      AZURE_SEARCH_SEMANTIC_CONFIGURATION: ${{ vars.AZURE_SEARCH_SEMANTIC_CONFIGURATION }}
+      AZURE_SEARCH_IDENTIFIER_FIELD: ${{ vars.AZURE_SEARCH_IDENTIFIER_FIELD }}
+      AZURE_SEARCH_CONTENT_FIELD: ${{ vars.AZURE_SEARCH_CONTENT_FIELD }}
+      AZURE_SEARCH_TITLE_FIELD: ${{ vars.AZURE_SEARCH_TITLE_FIELD }}
+      AZURE_SEARCH_EMBEDDING_FIELD: ${{ vars.AZURE_SEARCH_EMBEDDING_FIELD }}
+      AZURE_SEARCH_USE_VECTOR_QUERY: ${{ vars.AZURE_SEARCH_USE_VECTOR_QUERY }}
+      AZURE_SEARCH_SERVICE: ${{ vars.AZURE_SEARCH_SERVICE }}
+      AZURE_SEARCH_SERVICE_RESOURCE_GROUP: ${{ vars.AZURE_SEARCH_SERVICE_RESOURCE_GROUP }}
+      AZURE_SEARCH_SERVICE_LOCATION: ${{ vars.AZURE_SEARCH_SERVICE_LOCATION }}
+      AZURE_SEARCH_SERVICE_SKU: ${{ vars.AZURE_SEARCH_SERVICE_SKU }}
+      AZURE_SEARCH_SEMANTIC_RANKER: ${{ vars.AZURE_SEARCH_SEMANTIC_RANKER }}
+      AZURE_SEARCH_REUSE_EXISTING: ${{ vars.AZURE_SEARCH_REUSE_EXISTING }}
+      AZURE_SEARCH_ENDPOINT: ${{ vars.AZURE_SEARCH_ENDPOINT }}
+      AZURE_STORAGE_ACCOUNT: ${{ vars.AZURE_STORAGE_ACCOUNT }}
+      AZURE_STORAGE_RESOURCE_GROUP: ${{ vars.AZURE_STORAGE_RESOURCE_GROUP }}
+      AZURE_STORAGE_SKU: ${{ vars.AZURE_STORAGE_SKU }}
+      AZURE_CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
+      AZURE_CONTAINER_APPS_WORKLOAD_PROFILE: ${{ vars.AZURE_CONTAINER_APPS_WORKLOAD_PROFILE }}
+      AZURE_LOG_ANALYTICS: ${{ vars.AZURE_LOG_ANALYTICS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install azd
+        uses: Azure/setup-azd@v1.0.0
+
+      - name: Install Nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Log in with Azure (Federated Credentials)
+        if: ${{ env.AZURE_CLIENT_ID != '' }}
+        run: |
+          azd auth login `
+            --client-id "$Env:AZURE_CLIENT_ID" `
+            --federated-credential-provider "github" `
+            --tenant-id "$Env:AZURE_TENANT_ID"
+        shell: pwsh
+
+      - name: Provision Infrastructure
+        run: azd provision --no-prompt
+        env:
+          AZD_INITIAL_ENVIRONMENT_CONFIG: ${{ secrets.AZD_INITIAL_ENVIRONMENT_CONFIG }}
+          AZURE_SERVER_APP_SECRET: ${{ secrets.AZURE_SERVER_APP_SECRET }}
+          AZURE_CLIENT_APP_SECRET: ${{ secrets.AZURE_CLIENT_APP_SECRET }}
