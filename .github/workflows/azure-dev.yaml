@@ -6,7 +6,6 @@ on:
     # Run when commits are pushed to mainline branch
     branches:
       - main
-      - newdocs2
   pull_request:
 
 # GitHub Actions workflow to deploy to Azure using azd
