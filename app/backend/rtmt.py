@@ -58,7 +58,6 @@ class RTMiddleTier:
     disable_audio: Optional[bool] = None
     voice_choice: Optional[str] = None
     api_version: str = "2024-10-01-preview"
-
     _tools_pending = {}
     _token_provider = None
 
@@ -83,6 +82,7 @@ class RTMiddleTier:
                     # tools, this will need updating
                     session["instructions"] = ""
                     session["tools"] = []
+                    session["voice"] = self.voice_choice
                     session["tool_choice"] = "none"
                     session["max_response_output_tokens"] = None
                     updated_message = json.dumps(message)
@@ -164,6 +164,8 @@ class RTMiddleTier:
                         session["max_response_output_tokens"] = self.max_tokens
                     if self.disable_audio is not None:
                         session["disable_audio"] = self.disable_audio
+                    if self.voice_choice is not None:
+                        session["voice"] = self.voice_choice
                     session["tool_choice"] = "auto" if len(self.tools) > 0 else "none"
                     session["tools"] = [tool.schema for tool in self.tools.values()]
                     updated_message = json.dumps(message)
@@ -172,7 +174,7 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": self.api_version, "deployment": self.deployment, "voice" : self.voice_choice }
+            params = { "api-version": self.api_version, "deployment": self.deployment, "voice": self.voice_choice }
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
