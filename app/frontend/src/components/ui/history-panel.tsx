@@ -6,6 +6,8 @@ import GroundingFile from "./grounding-file";
 
 import { GroundingFile as GroundingFileType, HistoryItem } from "@/types";
 
+import { useTranslation } from "react-i18next";
+
 type Properties = {
     history: HistoryItem[];
     show: boolean;
@@ -14,6 +16,8 @@ type Properties = {
 };
 
 export default function HistoryPanel({ show, history, onClosed, onSelectedGroundingFile }: Properties) {
+    const { t } = useTranslation();
+
     return (
         <AnimatePresence>
             {show && (
@@ -26,7 +30,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                 >
                     <div className="p-4">
                         <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-xl font-bold">Answer history</h2>
+                            <h2 className="text-xl font-bold">{t("history.answerHistory")}</h2>
                             <Button variant="ghost" size="sm" onClick={onClosed}>
                                 <X className="h-5 w-5" />
                             </Button>
@@ -46,7 +50,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-500">No history yet.</p>
+                            <p className="text-gray-500">{t("history.noHistory")}</p>
                         )}
                     </div>
                 </motion.div>

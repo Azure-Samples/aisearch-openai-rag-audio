@@ -1,11 +1,15 @@
-import aiohttp
 import asyncio
 import json
+import logging
 from enum import Enum
 from typing import Any, Callable, Optional
+
+import aiohttp
 from aiohttp import web
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+
+logger = logging.getLogger("voicerag")
 
 class ToolResultDirection(Enum):
     TO_SERVER = 1
@@ -65,6 +69,8 @@ class RTMiddleTier:
         self.endpoint = endpoint
         self.deployment = deployment
         self.voice_choice = voice_choice
+        if voice_choice is not None:
+            logger.info("Realtime voice choice set to %s", voice_choice)
         if isinstance(credentials, AzureKeyCredential):
             self.key = credentials.key
         else:
