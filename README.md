@@ -45,7 +45,7 @@ Actually only theses 3 voices are supported on Azure OpenAI: echo, alloy, shimme
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
    AZURE_SEARCH_API_KEY=<your api key>
-   VOICE_CHOICE= < choose one voice : echo, alloy, shimmer >
+   AZURE_OPENAI_REALTIME_VOICE_CHOICE= < choose one voice : echo, alloy, shimmer >
    ```
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys. 
 
@@ -131,12 +131,12 @@ You can run this app locally using either the Azure services you provisioned by 
    ```shell
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
    AZURE_OPENAI_REALTIME_DEPLOYMENT=gpt-4o-realtime-preview
-   AZURE_OPENAI_REALTIME_VOICE_CHOICE= < choose one: nova, echo, alloy, fable, onyx, shimmer>
+   AZURE_OPENAI_REALTIME_VOICE_CHOICE= < choose only one voice:  echo, alloy, shimmer>
    AZURE_OPENAI_API_KEY=<your api key>
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
    AZURE_SEARCH_API_KEY=<your api key>
-   VOICE_CHOICE= < choose only one voice:  echo, alloy, shimmer>
+
    ```
 
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys.
