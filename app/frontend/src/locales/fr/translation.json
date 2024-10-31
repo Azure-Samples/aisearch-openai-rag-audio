@@ -2,6 +2,7 @@
     "app": {
         "title": "Parlez à vos données",
         "footer": "Créée avec Azure AI Search + Azure OpenAI",
+        "showHistory": "Afficher l'historique du chat",
         "stopRecording": "Arrêter l'enregistrement",
         "startRecording": "Commencer l'enregistrement",
         "stopConversation": "Arrêter la conversation"

@@ -2,6 +2,7 @@
     "app": {
         "title": "Talk to your data",
         "footer": "Built with Azure AI Search + Azure OpenAI",
+        "showHistory": "Show Chat History",
         "stopRecording": "Stop recording",
         "startRecording": "Start recording",
         "stopConversation": "Stop conversation"

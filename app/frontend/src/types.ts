@@ -1,20 +1,28 @@
+// Represents a grounding file
 export type GroundingFile = {
     id: string;
     name: string;
     content: string;
 };
 
+// Represents an item in the history
 export type HistoryItem = {
     id: string;
     transcript: string;
     groundingFiles: GroundingFile[];
+    sender: "user" | "assistant"; // Add sender field
+    timestamp: Date; // Add timestamp field
 };
 
+// Represents a command to update the session
 export type SessionUpdateCommand = {
     type: "session.update";
     session: {
         turn_detection?: {
             type: "server_vad" | "none";
+            threshold?: number;
+            prefix_padding_ms?: number;
+            silence_duration_ms?: number;
         };
         input_audio_transcription?: {
             model: "whisper-1";
@@ -22,29 +30,35 @@ export type SessionUpdateCommand = {
     };
 };
 
+// Represents a command to append audio to the input buffer
 export type InputAudioBufferAppendCommand = {
     type: "input_audio_buffer.append";
-    audio: string;
+    audio: string; // Ensure this is a valid base64-encoded string
 };
 
+// Represents a command to clear the input audio buffer
 export type InputAudioBufferClearCommand = {
     type: "input_audio_buffer.clear";
 };
 
+// Represents a generic message
 export type Message = {
     type: string;
 };
 
+// Represents a response containing an audio delta
 export type ResponseAudioDelta = {
     type: "response.audio.delta";
-    delta: string;
+    delta: string; // Ensure this is a valid base64-encoded string
 };
 
+// Represents a response containing an audio transcript delta
 export type ResponseAudioTranscriptDelta = {
     type: "response.audio_transcript.delta";
     delta: string;
 };
 
+// Represents a response indicating that input audio transcription is completed
 export type ResponseInputAudioTranscriptionCompleted = {
     type: "conversation.item.input_audio_transcription.completed";
     event_id: string;
@@ -53,6 +67,7 @@ export type ResponseInputAudioTranscriptionCompleted = {
     transcript: string;
 };
 
+// Represents a response indicating that the response is done
 export type ResponseDone = {
     type: "response.done";
     event_id: string;
@@ -62,6 +77,7 @@ export type ResponseDone = {
     };
 };
 
+// Represents a response from an extension middle tier tool
 export type ExtensionMiddleTierToolResponse = {
     type: "extension.middle_tier_tool.response";
     previous_item_id: string;
@@ -69,6 +85,7 @@ export type ExtensionMiddleTierToolResponse = {
     tool_result: string; // JSON string that needs to be parsed into ToolResult
 };
 
+// Represents the result from a tool
 export type ToolResult = {
     sources: { chunk_id: string; title: string; chunk: string }[];
 };

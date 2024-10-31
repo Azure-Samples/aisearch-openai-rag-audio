@@ -2,6 +2,7 @@
     "app": {
         "title": "データと話す",
         "footer": "Azure AI Search + Azure OpenAI で構築",
+        "showHistory": "チャット履歴を表示",
         "stopRecording": "録音を停止",
         "startRecording": "録音を開始",
         "stopConversation": "会話を停止"
