@@ -1,0 +1,29 @@
+# This is for internal use to make sure our samples follow best practices. You can delete this in your fork.
+name: Template Validation Sample Workflow
+on: 
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  template_validation_job:
+    runs-on: ubuntu-latest
+    name: template validation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/template-validation-action@v0.3.2
+        id: validation
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: print result
+        run: cat ${{ steps.validation.outputs.resultFile }}
