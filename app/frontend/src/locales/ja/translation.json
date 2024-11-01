@@ -2,7 +2,7 @@
     "app": {
         "title": "データと話す",
         "footer": "Azure AI Search + Azure OpenAI で構築",
-        "showHistory": "チャット履歴を表示",
+        "showTranscript": "トランスクリプトを表示",
         "stopRecording": "録音を停止",
         "startRecording": "録音を開始",
         "stopConversation": "会話を停止"
@@ -12,7 +12,7 @@
         "conversationInProgress": "会話が進行中"
     },
     "history": {
-        "answerHistory": "回答履歴",
+        "transcriptHistory": "トランスクリプト履歴",
         "noHistory": "まだ履歴はありません。"
     },
     "groundingFiles": {

@@ -2,7 +2,7 @@
     "app": {
         "title": "Parlez à vos données",
         "footer": "Créée avec Azure AI Search + Azure OpenAI",
-        "showHistory": "Afficher l'historique du chat",
+        "showTranscript": "Afficher la transcription",
         "stopRecording": "Arrêter l'enregistrement",
         "startRecording": "Commencer l'enregistrement",
         "stopConversation": "Arrêter la conversation"
@@ -12,7 +12,7 @@
         "conversationInProgress": "Conversation en cours"
     },
     "history": {
-        "answerHistory": "Historique des réponses",
+        "transcriptHistory": "Historique de la transcription",
         "noHistory": "Pas encore d'historique."
     },
     "groundingFiles": {

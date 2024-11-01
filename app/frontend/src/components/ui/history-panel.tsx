@@ -40,7 +40,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
         if (isLast) return false; // Do not show timestamp for the last message
         if (!next) return true;
         const diff = (next.getTime() - current.getTime()) / 1000; // Difference in seconds
-        return diff > 60; // Show timestamp if more than 30 seconds have passed
+        return diff > 60; // Show timestamp if more than 60 seconds have passed
     };
 
     return (
@@ -54,7 +54,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                     className="fixed inset-y-0 right-0 z-40 w-full overflow-y-auto bg-white shadow-lg sm:w-96"
                 >
                     <div className="sticky top-0 z-10 mb-4 flex items-center justify-between bg-white px-4 py-2">
-                        <h2 className="text-xl font-bold">{t("history.answerHistory")}</h2>
+                        <h2 className="text-xl font-bold">{t("history.transcriptHistory")}</h2>
                         <Button variant="ghost" size="sm" onClick={onClosed}>
                             <X className="h-5 w-5" />
                         </Button>
@@ -65,27 +65,21 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                                 {history.map((item, index) => {
                                     const nextItem = history[index + 1];
                                     const isLast = index === history.length - 1;
-                                    const showTimestamp = shouldShowTimestamp(
-                                        new Date(item.timestamp),
-                                        nextItem ? new Date(nextItem.timestamp) : undefined,
-                                        isLast
-                                    );
+                                    const showTimestamp = shouldShowTimestamp(item.timestamp, nextItem ? nextItem.timestamp : undefined, isLast);
                                     return (
                                         <div key={index}>
                                             <div
                                                 className={`rounded-lg p-4 shadow ${item.sender === "user" ? "ml-auto bg-blue-100 pl-4" : "bg-gray-100"}`}
-                                                style={{ maxWidth: "75%" }} // Optional: Limit the width of the bubbles
+                                                style={{ maxWidth: "75%" }}
                                             >
                                                 <p className="text-sm text-gray-700">{item.transcript}</p>
                                                 <div className="mt-2 flex flex-wrap gap-2">
-                                                    {item.groundingFiles.map((file, index) => (
+                                                    {item.groundingFiles?.map((file, index) => (
                                                         <GroundingFile key={index} value={file} onClick={() => onSelectedGroundingFile(file)} />
                                                     ))}
                                                 </div>
                                             </div>
-                                            {showTimestamp && (
-                                                <div className="mt-2 text-center text-xs text-gray-500">{formatTimestamp(new Date(item.timestamp))}</div>
-                                            )}
+                                            {showTimestamp && <div className="mt-2 text-center text-xs text-gray-500">{formatTimestamp(item.timestamp)}</div>}
                                         </div>
                                     );
                                 })}

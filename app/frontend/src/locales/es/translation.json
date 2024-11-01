@@ -2,7 +2,7 @@
     "app": {
         "title": "Habla con tus datos",
         "footer": "Creado con Azure AI Search + Azure OpenAI",
-        "showHistory": "Mostrar historial de chat",
+        "showTranscript": "Mostrar transcripción",
         "stopRecording": "Detener grabación",
         "startRecording": "Comenzar grabación",
         "stopConversation": "Detener conversación"
@@ -12,7 +12,7 @@
         "conversationInProgress": "Conversación en progreso"
     },
     "history": {
-        "answerHistory": "Historial de respuestas",
+        "transcriptHistory": "Historial de transcripciones",
         "noHistory": "Aún no hay historial."
     },
     "groundingFiles": {
