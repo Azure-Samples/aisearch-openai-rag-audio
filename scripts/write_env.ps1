@@ -7,6 +7,7 @@ Set-Content -Path $envFilePath -Value ""
 # Append new values to the .env file
 $azureOpenAiEndpoint = azd env get-value AZURE_OPENAI_ENDPOINT
 $azureOpenAiRealtimeDeployment = azd env get-value AZURE_OPENAI_REALTIME_DEPLOYMENT
+$azureOpenAiRealtimeVoiceChoice = azd env get-value AZURE_OPENAI_REALTIME_VOICE_CHOICE
 $azureSearchEndpoint = azd env get-value AZURE_SEARCH_ENDPOINT
 $azureSearchIndex = azd env get-value AZURE_SEARCH_INDEX
 $azureTenantId = azd env get-value AZURE_TENANT_ID
@@ -19,6 +20,7 @@ $azureSearchUseVectorQuery = azd env get-value AZURE_SEARCH_USE_VECTOR_QUERY
 
 Add-Content -Path $envFilePath -Value "AZURE_OPENAI_ENDPOINT=$azureOpenAiEndpoint"
 Add-Content -Path $envFilePath -Value "AZURE_OPENAI_REALTIME_DEPLOYMENT=$azureOpenAiRealtimeDeployment"
+Add-Content -Path $envFilePath -Value "AZURE_OPENAI_REALTIME_VOICE_CHOICE=$azureOpenAiRealtimeVoiceChoice"
 Add-Content -Path $envFilePath -Value "AZURE_SEARCH_ENDPOINT=$azureSearchEndpoint"
 Add-Content -Path $envFilePath -Value "AZURE_SEARCH_INDEX=$azureSearchIndex"
 Add-Content -Path $envFilePath -Value "AZURE_SEARCH_SEMANTIC_CONFIGURATION=$azureSearchSemanticConfiguration"
