@@ -35,23 +35,6 @@ You have a few options for getting started with this template. The quickest way 
 
 ### GitHub Codespaces
 
-### 3. Setting up the environment
-The app needs to know which service endpoints to use for the Azure OpenAI and Azure AI Search. The following variables can be set as environment variables, or you can create a ".env" file in the "app/backend/" directory with this content.
-Actually only theses 3 voices are supported on Azure OpenAI: echo, alloy, shimmer
-   ```
-   AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
-   AZURE_OPENAI_DEPLOYMENT=gpt-4o-realtime-preview
-   AZURE_OPENAI_API_KEY=<your api key>
-   AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
-   AZURE_SEARCH_INDEX=<your index name>
-   AZURE_SEARCH_API_KEY=<your api key>
-   AZURE_OPENAI_REALTIME_VOICE_CHOICE= < choose one voice : echo, alloy, shimmer >
-   ```
-   To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys. 
-
-### 4. Running the app
-
-#### GitHub Codespaces
 You can run this repo virtually by using GitHub Codespaces, which will open a web-based VS Code in your browser:
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&skip_quickstart=true&machine=basicLinux32gb&repo=860141324&devcontainer_path=.devcontainer%2Fdevcontainer.json&geo=WestUs2)
@@ -131,7 +114,7 @@ You can run this app locally using either the Azure services you provisioned by 
    ```shell
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
    AZURE_OPENAI_REALTIME_DEPLOYMENT=gpt-4o-realtime-preview
-   AZURE_OPENAI_REALTIME_VOICE_CHOICE= < choose only one voice:  echo, alloy, shimmer>
+   AZURE_OPENAI_REALTIME_VOICE_CHOICE=<choose one: echo, alloy, shimmer>
    AZURE_OPENAI_API_KEY=<your api key>
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>

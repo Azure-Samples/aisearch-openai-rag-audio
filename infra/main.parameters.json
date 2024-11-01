@@ -30,7 +30,7 @@
       "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT}"
     },
     "openAiRealtimeVoiceChoice": {
-      "value": "${AZURE_OPENAI_REALTIME_VOICE_CHOICE=standard}"
+      "value": "${AZURE_OPENAI_REALTIME_VOICE_CHOICE=alloy}"
     },
     "searchIndexName": {
       "value": "${AZURE_SEARCH_INDEX=voicerag-intvect}"
