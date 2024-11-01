@@ -119,7 +119,6 @@ You can run this app locally using either the Azure services you provisioned by 
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
    AZURE_SEARCH_API_KEY=<your api key>
-
    ```
 
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys.
