@@ -1,13 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "./button";
 import GroundingFile from "./grounding-file";
 
 import { GroundingFile as GroundingFileType, HistoryItem } from "@/types";
-
-import { useTranslation } from "react-i18next";
 
 type Properties = {
     history: HistoryItem[];
@@ -16,9 +15,10 @@ type Properties = {
     onSelectedGroundingFile: (file: GroundingFileType) => void;
 };
 
-export default function HistoryPanel({ show, history, onClosed, onSelectedGroundingFile }: Properties) {
+const HistoryPanel = ({ show, history, onClosed, onSelectedGroundingFile }: Properties) => {
     const { t } = useTranslation();
     const historyEndRef = useRef<HTMLDivElement>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
     // Scroll to the bottom whenever the history changes
     useEffect(() => {
@@ -27,21 +27,31 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
         }
     }, [history]);
 
+    // Update current time every second
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     const formatTimestamp = (timestamp: Date) => {
-        const hours = timestamp.getHours();
-        const minutes = timestamp.getMinutes();
-        const ampm = hours >= 12 ? "PM" : "AM";
-        const formattedHours = hours % 12 || 12;
-        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-        return `${formattedHours}:${formattedMinutes} ${ampm}`;
+        const options: Intl.DateTimeFormatOptions = {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true
+        };
+        return new Intl.DateTimeFormat(navigator.language, options).format(timestamp);
     };
 
-    const shouldShowTimestamp = (current: Date, next?: Date, isLast?: boolean) => {
-        if (isLast) return false; // Do not show timestamp for the last message
-        if (!next) return true;
-        const diff = (next.getTime() - current.getTime()) / 1000; // Difference in seconds
+    const shouldShowTimestamp = (current: Date, next?: Date) => {
+        const nextTime = next ? next.getTime() : currentTime.getTime();
+        const diff = (nextTime - current.getTime()) / 1000; // Difference in seconds
+
         return diff > 60; // Show timestamp if more than 60 seconds have passed
     };
+
+    const MemoizedGroundingFile = memo(GroundingFile);
 
     return (
         <AnimatePresence>
@@ -64,8 +74,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                             <div className="space-y-4">
                                 {history.map((item, index) => {
                                     const nextItem = history[index + 1];
-                                    const isLast = index === history.length - 1;
-                                    const showTimestamp = shouldShowTimestamp(item.timestamp, nextItem ? nextItem.timestamp : undefined, isLast);
+                                    const showTimestamp = shouldShowTimestamp(item.timestamp, nextItem ? nextItem.timestamp : undefined);
                                     return (
                                         <div key={index}>
                                             <div
@@ -75,7 +84,7 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
                                                 <p className="text-sm text-gray-700">{item.transcript}</p>
                                                 <div className="mt-2 flex flex-wrap gap-2">
                                                     {item.groundingFiles?.map((file, index) => (
-                                                        <GroundingFile key={index} value={file} onClick={() => onSelectedGroundingFile(file)} />
+                                                        <MemoizedGroundingFile key={index} value={file} onClick={() => onSelectedGroundingFile(file)} />
                                                     ))}
                                                 </div>
                                             </div>
@@ -93,4 +102,6 @@ export default function HistoryPanel({ show, history, onClosed, onSelectedGround
             )}
         </AnimatePresence>
     );
-}
+};
+
+export default HistoryPanel;
