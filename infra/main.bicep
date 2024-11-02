@@ -73,6 +73,7 @@ param openAiServiceName string = ''
 param openAiResourceGroupName string = ''
 param openAiEndpoint string = ''
 param openAiRealtimeDeployment string = ''
+param openAiRealtimeVoiceChoice string = ''
 
 @description('Location for the OpenAI resource group')
 @allowed([
@@ -210,6 +211,7 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
       AZURE_SEARCH_USE_VECTOR_QUERY: searchUseVectorQuery
       AZURE_OPENAI_ENDPOINT: reuseExistingOpenAi ? openAiEndpoint : openAi.outputs.endpoint
       AZURE_OPENAI_REALTIME_DEPLOYMENT: reuseExistingOpenAi ? openAiRealtimeDeployment : openAiDeployments[0].name
+      AZURE_OPENAI_REALTIME_VOICE_CHOICE: openAiRealtimeVoiceChoice
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
       // For using managed identity to access Azure resources. See https://github.com/microsoft/azure-container-apps/issues/442
@@ -401,6 +403,7 @@ output AZURE_OPENAI_ENDPOINT string = reuseExistingOpenAi ? openAiEndpoint : ope
 output AZURE_OPENAI_REALTIME_DEPLOYMENT string = reuseExistingOpenAi
   ? openAiRealtimeDeployment
   : openAiDeployments[0].name
+output AZURE_OPENAI_REALTIME_VOICE_CHOICE string = openAiRealtimeVoiceChoice
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT string = embedModel
 output AZURE_OPENAI_EMBEDDING_MODEL string = embedModel
 

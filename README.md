@@ -90,7 +90,7 @@ The steps below will provision Azure resources and deploy the application code t
     Enter a name that will be used for the resource group.
     This will create a new folder in the `.azure` folder, and set it as the active environment for any calls to `azd` going forward.
 
-1. (Optional) If you want to re-use any existing resources, follow [these instructions](docs/existing_services.md) to set the appropriate `azd` environment variables.
+1. (Optional) This is the point where you can customize the deployment by setting azd environment variables, in order to [use existing services](docs/existing_services.md) or [customize the voice choice](docs/customizing_deploy.md).
 
 1. Run this single command to provision the resources, deploy the code, and setup integrated vectorization for the sample data:
 
@@ -114,6 +114,7 @@ You can run this app locally using either the Azure services you provisioned by 
    ```shell
    AZURE_OPENAI_ENDPOINT=wss://<your instance name>.openai.azure.com
    AZURE_OPENAI_REALTIME_DEPLOYMENT=gpt-4o-realtime-preview
+   AZURE_OPENAI_REALTIME_VOICE_CHOICE=<choose one: echo, alloy, shimmer>
    AZURE_OPENAI_API_KEY=<your api key>
    AZURE_SEARCH_ENDPOINT=https://<your service name>.search.windows.net
    AZURE_SEARCH_INDEX=<your index name>
@@ -168,3 +169,9 @@ This template uses [Managed Identity](https://learn.microsoft.com/entra/identity
 ### Notes
 
 >Sample data: The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.
+
+## Resources
+
+* [Blog post: VoiceRAG](https://aka.ms/voicerag)
+* [Demo video: VoiceRAG](https://youtu.be/vXJka8xZ9Ko)
+* [Azure OpenAI Realtime Documentation](https://github.com/Azure-Samples/aoai-realtime-audio-sdk/)
