@@ -169,3 +169,9 @@ This template uses [Managed Identity](https://learn.microsoft.com/entra/identity
 ### Notes
 
 >Sample data: The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.
+
+## Resources
+
+* [Blog post: VoiceRAG](https://aka.ms/voicerag)
+* [Demo video: VoiceRAG](https://youtu.be/vXJka8xZ9Ko)
+* [Azure OpenAI Realtime Documentation](https://github.com/Azure-Samples/aoai-realtime-audio-sdk/)
