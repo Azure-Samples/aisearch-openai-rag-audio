@@ -85,7 +85,7 @@ param openAiRealtimeVoiceChoice string = ''
     type: 'location'
   }
 })
-param openAiResourceLocation string
+param openAiServiceLocation string
 
 param realtimeDeploymentCapacity int
 param embeddingDeploymentCapacity int
@@ -253,7 +253,7 @@ module openAi 'br/public:avm/res/cognitive-services/account:0.8.0' = if (!reuseE
   scope: openAiResourceGroup
   params: {
     name: !empty(openAiServiceName) ? openAiServiceName : '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-    location: openAiResourceLocation
+    location: openAiServiceLocation
     tags: tags
     kind: 'OpenAI'
     customSubDomainName: !empty(openAiServiceName)
