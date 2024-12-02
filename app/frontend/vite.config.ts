@@ -11,6 +11,7 @@ export default defineConfig({
         sourcemap: true
     },
     resolve: {
+        preserveSymlinks: true,
         alias: {
             "@": path.resolve(__dirname, "./src")
         }
