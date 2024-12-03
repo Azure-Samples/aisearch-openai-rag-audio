@@ -1,9 +1,9 @@
-# NLP Sensor Control:Uses enables NLP for a sensor including RAG + Voice Using Azure AI Search and the GPT-4o Realtime API for Audio
+# NLP Sensor Control: Enables realtimne NLP for a sensor including RAG
 
-[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&skip_quickstart=true&machine=basicLinux32gb&repo=860141324&devcontainer_path=.devcontainer%2Fdevcontainer.json&geo=WestUs2)
+[![Original repo](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&skip_quickstart=true&machine=basicLinux32gb&repo=860141324&devcontainer_path=.devcontainer%2Fdevcontainer.json&geo=WestUs2)
 [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure-Samples/aisearch-openai-rag-audio)
 
-This repo contains an example of how to implement RAG support in applications that use voice as their user interface, powered by the GPT-4o realtime API for audio. We describe the pattern in more detail in [this blog post](https://aka.ms/voicerag), and you can see this sample app in action in [this short video](https://youtu.be/vXJka8xZ9Ko).
+referendes: [this blog post](https://aka.ms/voicerag), and you can see this sample app in action in [this short video](https://youtu.be/vXJka8xZ9Ko).
 
 * [Features](#features)
 * [Architecture Diagram](#architecture-diagram)
@@ -21,7 +21,7 @@ This repo contains an example of how to implement RAG support in applications th
 * **Audio output**: The app plays the response from the GPT-4o Realtime API as audio, using the browser's audio capabilities.
 * **Citations**: The app shows the search results that were used to generate the response.
 
-### Architecture Diagram
+### Architecture Diagram - NEEDS UPDATING
 
 The `RTClient` in the frontend receives the audio input, sends that to the Python backend which uses an `RTMiddleTier` object to interface with the Azure OpenAI real-time API, and includes a tool for searching Azure AI Search.
 
