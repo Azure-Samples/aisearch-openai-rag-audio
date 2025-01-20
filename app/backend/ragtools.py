@@ -51,20 +51,20 @@ _grounding_tool_schema = {
 
 async def _search_tool(
     search_client: SearchClient, 
-    semantic_configuration: str,
+    semantic_configuration: str | None,
     identifier_field: str,
     content_field: str,
     embedding_field: str,
     use_vector_query: bool,
     args: Any) -> ToolResult:
     print(f"Searching for '{args['query']}' in the knowledge base.")
-    # Hybrid + Reranking query using Azure AI Search
+    # Hybrid query using Azure AI Search with (optional) Semantic Ranker
     vector_queries = []
     if use_vector_query:
         vector_queries.append(VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields=embedding_field))
     search_results = await search_client.search(
-        search_text=args['query'], 
-        query_type="semantic",
+        search_text=args["query"], 
+        query_type="semantic" if semantic_configuration else "simple",
         semantic_configuration_name=semantic_configuration,
         top=5,
         vector_queries=vector_queries,
@@ -103,7 +103,7 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
 def attach_rag_tools(rtmt: RTMiddleTier,
     credentials: AzureKeyCredential | DefaultAzureCredential,
     search_endpoint: str, search_index: str,
-    semantic_configuration: str,
+    semantic_configuration: str | None,
     identifier_field: str,
     content_field: str,
     embedding_field: str,
