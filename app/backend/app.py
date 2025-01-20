@@ -52,8 +52,8 @@ async def create_app():
 
     attach_rag_tools(rtmt,
         credentials=search_credential,
-        search_endpoint=os.environ.get("AZURE_SEARCH_ENDPOINT") or None,
-        search_index=os.environ.get("AZURE_SEARCH_INDEX") or None,
+        search_endpoint=os.environ.get("AZURE_SEARCH_ENDPOINT") ,
+        search_index=os.environ.get("AZURE_SEARCH_INDEX"),
         semantic_configuration=os.environ.get("AZURE_SEARCH_SEMANTIC_CONFIGURATION") or None,
         identifier_field=os.environ.get("AZURE_SEARCH_IDENTIFIER_FIELD") or "chunk_id",
         content_field=os.environ.get("AZURE_SEARCH_CONTENT_FIELD") or "chunk",
@@ -61,7 +61,7 @@ async def create_app():
         title_field=os.environ.get("AZURE_SEARCH_TITLE_FIELD") or "title",
         use_vector_query=(os.environ.get("AZURE_SEARCH_USE_VECTOR_QUERY") == "true") or True
         )
-    
+
     rtmt.attach_to_app(app, "/realtime")
 
     current_directory = Path(__file__).parent
