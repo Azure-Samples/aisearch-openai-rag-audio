@@ -52,7 +52,7 @@ async def create_app():
 
     attach_rag_tools(rtmt,
         credentials=search_credential,
-        search_endpoint=os.environ.get("AZURE_SEARCH_ENDPOINT") ,
+        search_endpoint=os.environ.get("AZURE_SEARCH_ENDPOINT"),
         search_index=os.environ.get("AZURE_SEARCH_INDEX"),
         semantic_configuration=os.environ.get("AZURE_SEARCH_SEMANTIC_CONFIGURATION") or None,
         identifier_field=os.environ.get("AZURE_SEARCH_IDENTIFIER_FIELD") or "chunk_id",
