@@ -9,12 +9,15 @@ from aiohttp import web
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
+# Set up logging
 logger = logging.getLogger("voicerag")
 
+# Enum for tool result direction
 class ToolResultDirection(Enum):
     TO_SERVER = 1
     TO_CLIENT = 2
 
+# Class to encapsulate tool results
 class ToolResult:
     text: str
     destination: ToolResultDirection
@@ -23,11 +26,13 @@ class ToolResult:
         self.text = text
         self.destination = destination
 
+    # Convert result to text
     def to_text(self) -> str:
         if self.text is None:
             return ""
         return self.text if type(self.text) == str else json.dumps(self.text)
 
+# Class to represent a tool
 class Tool:
     target: Callable[..., ToolResult]
     schema: Any
@@ -36,6 +41,7 @@ class Tool:
         self.target = target
         self.schema = schema
 
+# Class to track tool calls
 class RTToolCall:
     tool_call_id: str
     previous_id: str
@@ -44,17 +50,16 @@ class RTToolCall:
         self.tool_call_id = tool_call_id
         self.previous_id = previous_id
 
+# Main class for real-time middle tier
 class RTMiddleTier:
     endpoint: str
     deployment: str
     key: Optional[str] = None
     
-    # Tools are server-side only for now, though the case could be made for client-side tools
-    # in addition to server-side tools that are invisible to the client
+    # Dictionary to store tools
     tools: dict[str, Tool] = {}
 
-    # Server-enforced configuration, if set, these will override the client's configuration
-    # Typically at least the model name and system message will be set by the server
+    # Server-enforced configuration options
     model: Optional[str] = None
     system_message: Optional[str] = None
     temperature: Optional[float] = None
@@ -77,6 +82,7 @@ class RTMiddleTier:
             self._token_provider = get_bearer_token_provider(credentials, "https://cognitiveservices.azure.com/.default")
             self._token_provider() # Warm up during startup so we have a token cached when the first request arrives
 
+    # Process messages sent to the client
     async def _process_message_to_client(self, msg: str, client_ws: web.WebSocketResponse, server_ws: web.WebSocketResponse) -> Optional[str]:
         message = json.loads(msg.data)
         updated_message = msg.data
@@ -84,8 +90,7 @@ class RTMiddleTier:
             match message["type"]:
                 case "session.created":
                     session = message["session"]
-                    # Hide the instructions, tools and max tokens from clients, if we ever allow client-side 
-                    # tools, this will need updating
+                    # Hide the instructions, tools and max tokens from clients
                     session["instructions"] = ""
                     session["tools"] = []
                     session["voice"] = self.voice_choice
@@ -128,8 +133,7 @@ class RTMiddleTier:
                             }
                         })
                         if result.destination == ToolResultDirection.TO_CLIENT:
-                            # TODO: this will break clients that don't know about this extra message, rewrite 
-                            # this to be a regular text message with a special marker of some sort
+                            # Send tool result to client
                             await client_ws.send_json({
                                 "type": "extension.middle_tier_tool_response",
                                 "previous_item_id": tool_call.previous_id,
@@ -140,7 +144,7 @@ class RTMiddleTier:
 
                 case "response.done":
                     if len(self._tools_pending) > 0:
-                        self._tools_pending.clear() # Any chance tool calls could be interleaved across different outstanding responses?
+                        self._tools_pending.clear() # Clear pending tool calls
                         await server_ws.send_json({
                             "type": "response.create"
                         })
@@ -155,6 +159,7 @@ class RTMiddleTier:
 
         return updated_message
 
+    # Process messages sent to the server
     async def _process_message_to_server(self, msg: str, ws: web.WebSocketResponse) -> Optional[str]:
         message = json.loads(msg.data)
         updated_message = msg.data
@@ -178,6 +183,7 @@ class RTMiddleTier:
 
         return updated_message
 
+    # Forward messages between client and server
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
             params = { "api-version": self.api_version, "deployment": self.deployment}
@@ -189,6 +195,7 @@ class RTMiddleTier:
             else:
                 headers = { "Authorization": f"Bearer {self._token_provider()}" } # NOTE: no async version of token provider, maybe refresh token on a timer?
             async with session.ws_connect("/openai/realtime", headers=headers, params=params) as target_ws:
+                # Function to handle messages from client to server
                 async def from_client_to_server():
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
@@ -198,11 +205,12 @@ class RTMiddleTier:
                         else:
                             print("Error: unexpected message type:", msg.type)
                     
-                    # Means it is gracefully closed by the client then time to close the target_ws
+                    # Close the target_ws if client closes connection
                     if target_ws:
                         print("Closing OpenAI's realtime socket connection.")
                         await target_ws.close()
                         
+                # Function to handle messages from server to client
                 async def from_server_to_client():
                     async for msg in target_ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
@@ -215,14 +223,16 @@ class RTMiddleTier:
                 try:
                     await asyncio.gather(from_client_to_server(), from_server_to_client())
                 except ConnectionResetError:
-                    # Ignore the errors resulting from the client disconnecting the socket
+                    # Ignore errors from client disconnecting
                     pass
 
+    # WebSocket handler
     async def _websocket_handler(self, request: web.Request):
         ws = web.WebSocketResponse()
         await ws.prepare(request)
         await self._forward_messages(ws)
         return ws
     
+    # Attach WebSocket handler to app
     def attach_to_app(self, app, path):
         app.router.add_get(path, self._websocket_handler)
