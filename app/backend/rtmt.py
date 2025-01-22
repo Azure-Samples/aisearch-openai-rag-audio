@@ -146,9 +146,12 @@ class RTMiddleTier:
                         })
                     if "response" in message:
                         replace = False
-                        for i, output in enumerate(reversed(message["response"]["output"])):
+                        # Iterate in reverse while calculating the correct index
+                        for reverse_index, output in enumerate(reversed(message["response"]["output"])):
                             if output["type"] == "function_call":
-                                message["response"]["output"].pop(i)
+                                original_index = output_len - 1 - reverse_index  # Map reversed index to the original
+                                print("Len of message[response][output]:", output_len, ", output:", message["response"]["output"])
+                                message["response"]["output"].pop(original_index)
                                 replace = True
                         if replace:
                             updated_message = json.dumps(message)                        
