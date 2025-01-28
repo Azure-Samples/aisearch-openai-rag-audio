@@ -15,3 +15,19 @@ The default voice choice is `alloy`, but 2 other voices are available.
 
 Once you have set the voice choice, run `azd up` to apply the changes to the deployed app.
 If you've already run `azd up` and want to first preview the voice with the development server, then update your local `.env` file by running `./scripts/write_env.sh` or `pwsh ./scripts/write_env.ps1`, and then restart the development server.
+
+## Customizing the Azure OpenAI deployment
+
+To use a different version for the real-time deployment, run this command:
+
+```bash
+azd env set AZURE_OPENAI_REALTIME_DEPLOYMENT_VERSION 2024-12-17
+```
+
+To specify a different capacity (the default is 1), run this command:
+
+```bash
+azd env set AZURE_OPENAI_REALTIME_DEPLOYMENT_CAPACITY 2
+```
+
+You will need to run `azd up` to apply the changes to the Azure OpenAI resource.
