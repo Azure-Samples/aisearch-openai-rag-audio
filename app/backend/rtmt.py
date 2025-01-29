@@ -8,6 +8,8 @@ import aiohttp
 from aiohttp import web
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from aiohttp_proxy import ProxyConnector
+import os,re
 
 logger = logging.getLogger("voicerag")
 
@@ -69,6 +71,9 @@ class RTMiddleTier:
         self.endpoint = endpoint
         self.deployment = deployment
         self.voice_choice = voice_choice
+        self.https_proxy = os.environ.get("HTTPS_PROXY")
+        logger.info(f"use proxies: {re.sub(r'(//)([^:]+):([^@]+)@',r'\1*****:*****@',self.https_proxy)}")
+
         if voice_choice is not None:
             logger.info("Realtime voice choice set to %s", voice_choice)
         if isinstance(credentials, AzureKeyCredential):
@@ -179,7 +184,8 @@ class RTMiddleTier:
         return updated_message
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
-        async with aiohttp.ClientSession(base_url=self.endpoint) as session:
+        connector = ProxyConnector.from_url(self.https_proxy) if self.https_proxy else None
+        async with aiohttp.ClientSession(base_url=self.endpoint,connector=connector) as session:
             params = { "api-version": self.api_version, "deployment": self.deployment}
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
