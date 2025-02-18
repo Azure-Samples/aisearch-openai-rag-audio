@@ -88,6 +88,7 @@ param openAiRealtimeVoiceChoice string = ''
 param openAiServiceLocation string
 
 param realtimeDeploymentCapacity int
+param realtimeDeploymentVersion string
 param embeddingDeploymentCapacity int
 
 param tenantId string = tenant().tenantId
@@ -227,7 +228,7 @@ var openAiDeployments = [
     model: {
       format: 'OpenAI'
       name: 'gpt-4o-realtime-preview'
-      version: '2024-10-01'
+      version: realtimeDeploymentVersion
     }
     sku: {
       name: 'GlobalStandard'
