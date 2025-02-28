@@ -8,7 +8,6 @@ from azure.search.documents.models import VectorizableTextQuery
 
 from rtmt import RTMiddleTier, Tool, ToolResult, ToolResultDirection
 
-# Schema for the search tool
 _search_tool_schema = {
     "type": "function",
     "name": "search",
@@ -28,7 +27,6 @@ _search_tool_schema = {
     }
 }
 
-# Schema for the grounding tool
 _grounding_tool_schema = {
     "type": "function",
     "name": "report_grounding",
@@ -51,7 +49,6 @@ _grounding_tool_schema = {
     }
 }
 
-# Asynchronous function to perform a search query
 async def _search_tool(
     search_client: SearchClient, 
     semantic_configuration: str | None,
@@ -78,15 +75,15 @@ async def _search_tool(
         result += f"[{r[identifier_field]}]: {r[content_field]}\n-----\n"
     return ToolResult(result, ToolResultDirection.TO_SERVER)
 
-# Regular expression pattern for validating keys
 KEY_PATTERN = re.compile(r'^[a-zA-Z0-9_=\-]+$')
 
-# Asynchronous function to report grounding sources
+# TODO: move from sending all chunks used for grounding eagerly to only sending links to 
+# the original content in storage, it'll be more efficient overall
 async def _report_grounding_tool(search_client: SearchClient, identifier_field: str, title_field: str, content_field: str, args: Any) -> None:
     sources = [s for s in args["sources"] if KEY_PATTERN.match(s)]
     list = " OR ".join(sources)
     print(f"Grounding source: {list}")
-    # Use search instead of filter to align with how detailed integrated vectorization indexes
+    # Use search instead of filter to align with how detailt integrated vectorization indexes
     # are generated, where chunk_id is searchable with a keyword tokenizer, not filterable 
     search_results = await search_client.search(search_text=list, 
                                                 search_fields=[identifier_field], 
@@ -103,7 +100,6 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
         docs.append({"chunk_id": r[identifier_field], "title": r[title_field], "chunk": r[content_field]})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
-# Function to attach RAG tools to the RTMiddleTier
 def attach_rag_tools(rtmt: RTMiddleTier,
     credentials: AzureKeyCredential | DefaultAzureCredential,
     search_endpoint: str, search_index: str,
@@ -118,7 +114,5 @@ def attach_rag_tools(rtmt: RTMiddleTier,
         credentials.get_token("https://search.azure.com/.default") # warm this up before we start getting requests
     search_client = SearchClient(search_endpoint, search_index, credentials, user_agent="RTMiddleTier")
 
-    # Attach the search tool to the RTMiddleTier
     rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, semantic_configuration, identifier_field, content_field, embedding_field, use_vector_query, args))
-    # Attach the grounding tool to the RTMiddleTier
     rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, identifier_field, title_field, content_field, args))

@@ -77,6 +77,7 @@ class RTMiddleTier:
     disable_audio: Optional[bool] = None
     voice_choice: Optional[str] = None
     api_version: str = "2024-10-01-preview"
+    # api_version: str = "2024-12-17-preview"
     _tools_pending = {}
     _token_provider = None
 

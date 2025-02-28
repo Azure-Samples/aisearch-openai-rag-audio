@@ -2,6 +2,9 @@
 
 . ./scripts/load_python_env.sh
 
+export VITE_BUILD_OUTDIR="../backend/static"
+export VITE_ENV_PATH="../backend/.env"
+
 echo ""
 echo "Restoring frontend npm packages"
 echo ""

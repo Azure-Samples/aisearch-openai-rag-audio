@@ -51,10 +51,19 @@ export default function useRealTime({
     onReceivedInputAudioTranscriptionCompleted,
     onReceivedError
 }: Parameters) {
+    const SERVICE_URL = import.meta.env.VITE_WS_TARGET || "ws://localhost:8766";
+    const IS_WEB_APP = import.meta.env.VITE_IS_WEB_APP === "true";
+    const REQUEST_PATH = IS_WEB_APP ? "/realtime" : "/api/realtime/ws";
+
+    console.log("useDirectAoaiApi", import.meta.env.VITE_WS_TARGET);
+    console.log("process.env.VITE_IS_WEB_APP", import.meta.env.VITE_IS_WEB_APP);
+    console.log("SERVICE_URL", SERVICE_URL);
+    console.log("IS_WEB_APP", IS_WEB_APP);
+    console.log("REQUEST_PATH", REQUEST_PATH);
+
     const wsEndpoint = useDirectAoaiApi
         ? `${aoaiEndpointOverride}/openai/realtime?api-key=${aoaiApiKeyOverride}&deployment=${aoaiModelOverride}&api-version=2024-10-01-preview`
-        : // : `/realtime`;
-          `/api/realtime/ws`;
+        : `${SERVICE_URL}${REQUEST_PATH}`;
 
     const { sendJsonMessage } = useWebSocket(wsEndpoint, {
         onOpen: () => onWebSocketOpen?.(),
