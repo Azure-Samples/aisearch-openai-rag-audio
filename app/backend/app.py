@@ -10,7 +10,13 @@ from dotenv import load_dotenv
 from ragtools import attach_rag_tools
 from rtmt import RTMiddleTier
 
-logging.basicConfig(level=logging.INFO)
+from rich.logging import RichHandler
+
+FORMAT = "%(message)s"
+logging.basicConfig(
+    level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+)
+
 logger = logging.getLogger("voicerag")
 
 async def create_app():
