@@ -2,6 +2,7 @@
     "app": {
         "title": "Talk to your data",
         "footer": "Built with Azure AI Search + Azure OpenAI",
+        "showTranscript": "Show transcript",
         "stopRecording": "Stop recording",
         "startRecording": "Start recording",
         "stopConversation": "Stop conversation"
@@ -11,7 +12,7 @@
         "conversationInProgress": "Conversation in progress"
     },
     "history": {
-        "answerHistory": "Answer history",
+        "transcriptHistory": "Transcript history",
         "noHistory": "No history yet."
     },
     "groundingFiles": {
