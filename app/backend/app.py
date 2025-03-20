@@ -59,7 +59,7 @@ async def create_app():
         content_field=os.environ.get("AZURE_SEARCH_CONTENT_FIELD") or "chunk",
         embedding_field=os.environ.get("AZURE_SEARCH_EMBEDDING_FIELD") or "text_vector",
         title_field=os.environ.get("AZURE_SEARCH_TITLE_FIELD") or "title",
-        use_vector_query=(os.environ.get("AZURE_SEARCH_USE_VECTOR_QUERY") == "true") or True
+        use_vector_query=(os.getenv("AZURE_SEARCH_USE_VECTOR_QUERY", "true") == "true")
         )
 
     rtmt.attach_to_app(app, "/realtime")
