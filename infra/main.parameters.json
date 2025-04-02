@@ -93,7 +93,7 @@
       "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT_CAPACITY=1}"
     },
     "realtimeDeploymentVersion": {
-      "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT_VERSION=2024-10-01}"
+      "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT_VERSION=2024-12-17}"
     },
     "embeddingDeploymentCapacity": {
       "value": "${AZURE_OPENAI_EMB_DEPLOYMENT_CAPACITY=30}"
