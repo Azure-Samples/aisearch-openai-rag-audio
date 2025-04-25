@@ -22,5 +22,10 @@
         "**/node_modules": true,
         "static": true
     },
-    "python.envFile": ""
+    "python.envFile": "",
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "main"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/b0167084-1f27-4824-b52b-67d6568fa14f/resourceGroups/appsvc_linux_eastus2_basic/providers/Microsoft.Web/sites/AtheticBalancesessions",
+    "appService.deploySubpath": "."
 }
