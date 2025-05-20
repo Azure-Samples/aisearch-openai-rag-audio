@@ -146,6 +146,9 @@ class RTMiddleTier:
                         })
                     if "response" in message:
                         replace = False
+                        # Get the original list length
+                        output_len = len(message["response"]["output"])
+                        
                         # Iterate in reverse while calculating the correct index
                         for reverse_index, output in enumerate(reversed(message["response"]["output"])):
                             if output["type"] == "function_call":
