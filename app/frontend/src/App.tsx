@@ -19,6 +19,7 @@ function App() {
     const [isRecording, setIsRecording] = useState(false);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
+    const [conversationSummary, setConversationSummary] = useState<string>("");
 
     const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
         onWebSocketOpen: () => console.log("WebSocket connection opened"),
@@ -32,13 +33,18 @@ function App() {
             stopAudioPlayer();
         },
         onReceivedExtensionMiddleTierToolResponse: message => {
-            const result: ToolResult = JSON.parse(message.tool_result);
+            if (message.tool_name === "sumarize_conversation") {
+                const toolResult = JSON.parse(message.tool_result);
+                setConversationSummary(toolResult.conversation_summary);
+            } else {
+                const result: ToolResult = JSON.parse(message.tool_result);
 
-            const files: GroundingFile[] = result.sources.map(x => {
-                return { id: x.chunk_id, name: x.title, content: x.chunk };
-            });
+                const files: GroundingFile[] = result.sources.map(x => {
+                    return { id: x.chunk_id, name: x.title, content: x.chunk };
+                });
 
-            setGroundingFiles(prev => [...prev, ...files]);
+                setGroundingFiles(prev => [...prev, ...files]);
+            }
         }
     });
 
@@ -92,6 +98,11 @@ function App() {
                     <StatusMessage isRecording={isRecording} />
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
+
+                <div>
+                    <h2>Conversation Summary</h2>
+                    <p>{conversationSummary}</p>
+                </div>
             </main>
 
             <footer className="py-4 text-center">

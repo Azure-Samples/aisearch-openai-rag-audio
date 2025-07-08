@@ -58,6 +58,7 @@ async def _search_tool(
     use_vector_query: bool,
     args: Any) -> ToolResult:
     print(f"Searching for '{args['query']}' in the knowledge base.")
+    
     # Hybrid query using Azure AI Search with (optional) Semantic Ranker
     vector_queries = []
     if use_vector_query:
@@ -71,6 +72,7 @@ async def _search_tool(
         select=", ".join([identifier_field, content_field])
     )
     result = ""
+    
     async for r in search_results:
         result += f"[{r[identifier_field]}]: {r[content_field]}\n-----\n"
     return ToolResult(result, ToolResultDirection.TO_SERVER)
@@ -100,6 +102,12 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
         docs.append({"chunk_id": r[identifier_field], "title": r[title_field], "chunk": r[content_field]})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
+async def programming_quote_api_tool(args: Any) -> ToolResult:
+    logger.info("Calling Programming Quotes API for a random quote.")
+    url = "https://programming-quotesapi.vercel.app/api/random"
+    # result = await requests.get(url)
+    return ToolResult({"quote": "Hello world"}, ToolResultDirection.TO_CLIENT)
+
 def attach_rag_tools(rtmt: RTMiddleTier,
     credentials: AzureKeyCredential | DefaultAzureCredential,
     search_endpoint: str, search_index: str,
@@ -116,3 +124,4 @@ def attach_rag_tools(rtmt: RTMiddleTier,
 
     rtmt.tools["search"] = Tool(schema=_search_tool_schema, target=lambda args: _search_tool(search_client, semantic_configuration, identifier_field, content_field, embedding_field, use_vector_query, args))
     rtmt.tools["report_grounding"] = Tool(schema=_grounding_tool_schema, target=lambda args: _report_grounding_tool(search_client, identifier_field, title_field, content_field, args))
+    #rtmt.tools["programming_quote_api"] = Tool(schema=_programming_quote_api_tool_schema, target=lambda args: programming_quote_api_tool(args))
