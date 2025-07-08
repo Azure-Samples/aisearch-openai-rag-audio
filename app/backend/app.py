@@ -52,7 +52,11 @@ async def create_app():
         2. Always use the 'report_grounding' tool to report the source of information from the knowledge base. 
         3. Produce an answer that's as short as possible. If the answer isn't in the knowledge base, say you don't know.
         4. Ask the user if their question was correctly answered
-        5. If the user asks for more information, repeat the steps above, else if the user says their questions where correctly answered, always use the 'sumarize_conversation' tool to generate the conversation's summary.
+        5. If the user says their question was correctly answered, tell them you where pleased to help and are available for future inquiries.
+        6. If the user says their question was not correctly answered, ask them to rephrase their question.
+        7. If you are not able to answer the question, say you don't know and ask the user to rephrase their question.
+        8. If after rephrasing the question you are still not able to answer it, say you don't know and tell the user you will redirect them to the department you consider can answer the question, use the 'sumarize_conversation' to generate a summary and sentiment analysis that will help the human support agent answer the user's inquiry.
+        9. If the user asks for more information, repeat the steps above.
     """.strip()
 
     attach_rag_tools(rtmt,
