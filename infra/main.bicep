@@ -182,6 +182,10 @@ module containerApps 'core/host/container-apps.bicep' = {
 module acaBackend 'core/host/container-app-upsert.bicep' = {
   name: 'aca-web'
   scope: resourceGroup
+  dependsOn: [
+    containerApps
+    acaIdentity
+  ]
   params: {
     name: !empty(backendServiceName) ? backendServiceName : '${abbrs.webSitesContainerApps}backend-${resourceToken}'
     location: location
@@ -415,7 +419,7 @@ output AZURE_SEARCH_TITLE_FIELD string = searchTitleField
 output AZURE_SEARCH_EMBEDDING_FIELD string = searchEmbeddingField
 output AZURE_SEARCH_USE_VECTOR_QUERY bool = searchUseVectorQuery
 
-output AZURE_STORAGE_ENDPOINT string = 'https://${storage.outputs.name}.blob.${environment().suffixes.storage}'
+output AZURE_STORAGE_ENDPOINT string = 'https://${storage.outputs.name}.blob.core.windows.net'
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_CONNECTION_STRING string = 'ResourceId=/subscriptions/${subscription().subscriptionId}/resourceGroups/${storageResourceGroup.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}'
 output AZURE_STORAGE_CONTAINER string = storageContainerName

@@ -35,6 +35,8 @@ var workloadProfiles = workloadProfile == 'Consumption'
 @description('Optional user assigned identity IDs to assign to the resource')
 param userAssignedIdentityResourceIds array = []
 
+var containerRegistryResourceGroupScope = !empty(containerRegistryResourceGroupName) ? resourceGroup(containerRegistryResourceGroupName) : resourceGroup()
+
 module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.5.2' = {
   name: '${name}-container-apps-environment'
   params: {
@@ -58,20 +60,9 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.5.2
   }
 }
 
-module containerRegistry 'br/public:avm/res/container-registry/registry:0.3.1' = if (empty(containerRegistryResourceGroupName)) {
+module containerRegistry 'br/public:avm/res/container-registry/registry:0.3.1' = {
   name: '${name}-container-registry'
-  scope: resourceGroup()
-  params: {
-    name: containerRegistryName
-    location: location
-    acrAdminUserEnabled: containerRegistryAdminUserEnabled
-    tags: tags
-  }
-}
-
-module containerRegistryExternal 'br/public:avm/res/container-registry/registry:0.3.1' = if (!empty(containerRegistryResourceGroupName)) {
-  name: '${name}-container-registry-external'
-  scope: resourceGroup(containerRegistryResourceGroupName)
+  scope: containerRegistryResourceGroupScope
   params: {
     name: containerRegistryName
     location: location
@@ -84,5 +75,5 @@ output defaultDomain string = containerAppsEnvironment.outputs.defaultDomain
 output environmentName string = containerAppsEnvironment.outputs.name
 output environmentId string = containerAppsEnvironment.outputs.resourceId
 
-output registryLoginServer string = empty(containerRegistryResourceGroupName) ? containerRegistry.outputs.loginServer : containerRegistryExternal.outputs.loginServer
-output registryName string = empty(containerRegistryResourceGroupName) ? containerRegistry.outputs.name : containerRegistryExternal.outputs.name
+output registryLoginServer string = containerRegistry.outputs.loginServer
+output registryName string = containerRegistry.outputs.name
