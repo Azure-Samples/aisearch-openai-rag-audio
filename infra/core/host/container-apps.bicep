@@ -35,8 +35,6 @@ var workloadProfiles = workloadProfile == 'Consumption'
 @description('Optional user assigned identity IDs to assign to the resource')
 param userAssignedIdentityResourceIds array = []
 
-var containerRegistryResourceGroupScope = !empty(containerRegistryResourceGroupName) ? resourceGroup(containerRegistryResourceGroupName) : resourceGroup()
-
 module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.5.2' = {
   name: '${name}-container-apps-environment'
   params: {
@@ -59,6 +57,8 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.5.2
     workloadProfiles: workloadProfiles
   }
 }
+
+var containerRegistryResourceGroupScope = !empty(containerRegistryResourceGroupName) ? resourceGroup(containerRegistryResourceGroupName) : resourceGroup()
 
 module containerRegistry 'br/public:avm/res/container-registry/registry:0.3.1' = {
   name: '${name}-container-registry'
