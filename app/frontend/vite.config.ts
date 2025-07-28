@@ -17,6 +17,7 @@ export default defineConfig({
         }
     },
     server: {
+        cors: true,
         proxy: {
             "/realtime": {
                 target: "ws://localhost:8765",
