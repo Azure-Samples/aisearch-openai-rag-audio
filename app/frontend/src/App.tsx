@@ -3,24 +3,27 @@ import { Mic, MicOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { GroundingFiles } from "@/components/ui/grounding-files";
 import GroundingFileView from "@/components/ui/grounding-file-view";
 import StatusMessage from "@/components/ui/status-message";
+import HistoryPanel from "@/components/ui/history-panel";
 
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
 import useAudioPlayer from "@/hooks/useAudioPlayer";
 
-import { GroundingFile, ToolResult } from "./types";
+import { GroundingFile, HistoryItem, ToolResult } from "./types";
 
 import logo from "./assets/logo.svg";
 
 function App() {
     const [isRecording, setIsRecording] = useState(false);
-    const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
+    const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
+    const [showTranscript, setShowTranscript] = useState(false);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
 
     const { startSession, addUserAudio, inputAudioBufferClear } = useRealTime({
+        enableInputAudioTranscription: true, // Enable input audio transcription from the user to show in the history
         onWebSocketOpen: () => console.log("WebSocket connection opened"),
         onWebSocketClose: () => console.log("WebSocket connection closed"),
         onWebSocketError: event => console.error("WebSocket error:", event),
@@ -33,12 +36,39 @@ function App() {
         },
         onReceivedExtensionMiddleTierToolResponse: message => {
             const result: ToolResult = JSON.parse(message.tool_result);
-
             const files: GroundingFile[] = result.sources.map(x => {
                 return { id: x.chunk_id, name: x.title, content: x.chunk };
             });
 
-            setGroundingFiles(prev => [...prev, ...files]);
+            setGroundingFiles(files); // Store the grounding files for the assistant
+        },
+        onReceivedInputAudioTranscriptionCompleted: message => {
+            // Update history with input audio transcription when completed
+            const newHistoryItem: HistoryItem = {
+                id: message.event_id,
+                transcript: message.transcript,
+                groundingFiles: [],
+                sender: "user",
+                timestamp: new Date() // Add timestamp
+            };
+            setHistory(prev => [...prev, newHistoryItem]);
+        },
+        onReceivedResponseDone: message => {
+            const transcript = message.response.output.map(output => output.content?.map(content => content.transcript).join(" ")).join(" ");
+            if (!transcript) {
+                return;
+            }
+
+            // Update history with response done
+            const newHistoryItem: HistoryItem = {
+                id: message.event_id,
+                transcript: transcript,
+                groundingFiles: groundingFiles,
+                sender: "assistant",
+                timestamp: new Date() // Add timestamp
+            };
+            setHistory(prev => [...prev, newHistoryItem]);
+            setGroundingFiles([]); // Clear the assistant grounding files after use
         }
     });
 
@@ -91,7 +121,15 @@ function App() {
                     </Button>
                     <StatusMessage isRecording={isRecording} />
                 </div>
-                <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
+                <div className="mb-4 flex space-x-4">
+                    <button
+                        onClick={() => setShowTranscript(!showTranscript)}
+                        className="text-blue-500 hover:underline focus:outline-none"
+                        aria-label={t("app.showTranscript")}
+                    >
+                        {t("app.showTranscript")}
+                    </button>
+                </div>
             </main>
 
             <footer className="py-4 text-center">
@@ -99,6 +137,8 @@ function App() {
             </footer>
 
             <GroundingFileView groundingFile={selectedFile} onClosed={() => setSelectedFile(null)} />
+
+            <HistoryPanel show={showTranscript} history={history} onClosed={() => setShowTranscript(false)} onSelectedGroundingFile={setSelectedFile} />
         </div>
     );
 }
