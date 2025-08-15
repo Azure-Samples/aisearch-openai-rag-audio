@@ -68,6 +68,7 @@ async def _search_tool(
         semantic_configuration_name=semantic_configuration,
         top=5,
         vector_queries=vector_queries,
+        search_fields=[content_field],
         select=", ".join([identifier_field, content_field])
     )
     result = ""
@@ -86,7 +87,7 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
     # Use search instead of filter to align with how detailt integrated vectorization indexes
     # are generated, where chunk_id is searchable with a keyword tokenizer, not filterable 
     search_results = await search_client.search(search_text=list, 
-                                                search_fields=[identifier_field], 
+                                                search_fields=[content_field], 
                                                 select=[identifier_field, title_field, content_field], 
                                                 top=len(sources), 
                                                 query_type="full")
