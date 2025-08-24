@@ -19,6 +19,7 @@ type Parameters = {
     aoaiModelOverride?: string;
 
     enableInputAudioTranscription?: boolean;
+    shouldConnect: boolean;
     onWebSocketOpen?: () => void;
     onWebSocketClose?: () => void;
     onWebSocketError?: (event: Event) => void;
@@ -39,6 +40,7 @@ export default function useRealTime({
     aoaiApiKeyOverride,
     aoaiModelOverride,
     enableInputAudioTranscription,
+    shouldConnect,
     onWebSocketOpen,
     onWebSocketClose,
     onWebSocketError,
@@ -55,13 +57,17 @@ export default function useRealTime({
         ? `${aoaiEndpointOverride}/openai/realtime?api-key=${aoaiApiKeyOverride}&deployment=${aoaiModelOverride}&api-version=2024-10-01-preview`
         : `/realtime`;
 
-    const { sendJsonMessage } = useWebSocket(wsEndpoint, {
-        onOpen: () => onWebSocketOpen?.(),
-        onClose: () => onWebSocketClose?.(),
-        onError: event => onWebSocketError?.(event),
-        onMessage: event => onMessageReceived(event),
-        shouldReconnect: () => true
-    });
+    const { sendJsonMessage } = useWebSocket(
+        wsEndpoint,
+        {
+            onOpen: () => onWebSocketOpen?.(),
+            onClose: () => onWebSocketClose?.(),
+            onError: event => onWebSocketError?.(event),
+            onMessage: event => onMessageReceived(event),
+            shouldReconnect: () => true
+        },
+        shouldConnect
+    );
 
     const startSession = () => {
         const command: SessionUpdateCommand = {

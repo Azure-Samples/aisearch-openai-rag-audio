@@ -39,7 +39,8 @@ function App() {
             });
 
             setGroundingFiles(prev => [...prev, ...files]);
-        }
+        },
+        shouldConnect: isRecording
     });
 
     const { reset: resetAudioPlayer, play: playAudio, stop: stopAudioPlayer } = useAudioPlayer();
