@@ -1,52 +1,447 @@
-# VoiceRAG: An Application Pattern for RAG + Voice Using Azure AI Search and the GPT-4o Realtime API for Audio
+# 🎙️ VoiceRAG: Azure OpenAI Realtime API + RAG with Arabic Support
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&skip_quickstart=true&machine=basicLinux32gb&repo=860141324&devcontainer_path=.devcontainer%2Fdevcontainer.json&geo=WestUs2)
 [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure-Samples/aisearch-openai-rag-audio)
 
-This repo contains an example of how to implement RAG support in applications that use voice as their user interface, powered by the GPT-4o realtime API for audio. We describe the pattern in more detail in [this blog post](https://aka.ms/voicerag), and you can see this sample app in action in [this short video](https://youtu.be/vXJka8xZ9Ko).
+An advanced voice-enabled application demonstrating the integration of **Azure OpenAI Realtime API** with **Retrieval-Augmented Generation (RAG)** using **Azure AI Search**. Features a unique 3-stage audio sequence, Arabic language support, and intelligent conversation capabilities.
 
-* [Features](#features)
-* [Architecture Diagram](#architecture-diagram)
-* [Getting Started](#getting-started)
-  * [GitHub Codespaces](#github-codespaces)
-  * [VS Code Dev Containers](#vs-code-dev-containers)
-  * [Local environment](#local-environment)
-* [Deploying the app](#deploying-the-app)
-* [Development server](#development-server)
+## 🌟 Key Features
 
-## Features
+- 🎵 **3-Stage Audio Sequence** - Professional audio flow before voice conversation
+- 🗣️ **Real-time Voice Chat** - Powered by Azure OpenAI Realtime API  
+- 🔍 **Arabic RAG Search** - Native Arabic language support with Azure AI Search
+- ⚡ **Instant Responses** - Sub-200ms search performance
+- 🎯 **Smart Suggestions** - Contextual recommendations and error handling
+- 📱 **Modern UI** - React/TypeScript interface with real-time visualizations
 
-* **Voice interface**: The app uses the browser's microphone to capture voice input, and sends it to the backend where it is processed by the Azure OpenAI GPT-4o Realtime API.
-* **RAG (Retrieval Augmented Generation)**: The app uses the Azure AI Search service to answer questions about a knowledge base, and sends the retrieved documents to the GPT-4o Realtime API to generate a response.
-* **Audio output**: The app plays the response from the GPT-4o Realtime API as audio, using the browser's audio capabilities.
-* **Citations**: The app shows the search results that were used to generate the response.
+## 🎵 Unique Audio Experience
 
-### Architecture Diagram
+### The 3-Stage Audio Flow
+```
+🟣 User Clicks Purple Button
+        ↓
+🎵 Ran.mp3 (System Start - 3 seconds)
+        ↓  
+🔔 between.wav (Transition - 1 second)
+        ↓
+🎤 Nancy.wav (Welcome - 2 seconds)
+        ↓
+🚀 Azure OpenAI Realtime API Activated
+        ↓
+💬 Voice Conversation Ready
+```
 
-The `RTClient` in the frontend receives the audio input, sends that to the Python backend which uses an `RTMiddleTier` object to interface with the Azure OpenAI real-time API, and includes a tool for searching Azure AI Search.
+This creates a professional, engaging experience that smoothly transitions users from a static interface to dynamic voice conversation.
 
-![Diagram of real-time RAG pattern](docs/RTMTPattern.png)
+## 🏗️ Architecture Overview
 
-This repository includes infrastructure as code and a `Dockerfile` to deploy the app to Azure Container Apps, but it can also be run locally as long as Azure AI Search and Azure OpenAI services are configured.
+![Architecture diagram showing the 3-stage audio sequence and RAG integration](docs/RTMTPattern.png)
 
-## Getting Started
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│  React Frontend │◄──►│  Python Backend  │◄──►│  Azure Services │
+│                 │    │                  │    │                 │
+│ • Audio Player  │    │ • WebSocket      │    │ • OpenAI Realtime│
+│ • Voice Input   │    │ • RAG Tools      │    │ • AI Search     │
+│ • UI Components │    │ • Static Server  │    │ • Arabic Data   │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+```
 
-You have a few options for getting started with this template. The quickest way to get started is [GitHub Codespaces](#github-codespaces), since it will setup all the tools for you, but you can also [set it up locally](#local-environment). You can also use a [VS Code dev container](#vs-code-dev-containers)
+### Core Components
 
-### GitHub Codespaces
+1. **Frontend (React/TypeScript)**
+   - Custom audio sequence player
+   - Real-time voice recording and playback
+   - Interactive UI with status indicators
 
-You can run this repo virtually by using GitHub Codespaces, which will open a web-based VS Code in your browser:
+2. **Backend (Python/aiohttp)**
+   - WebSocket server for real-time communication
+   - RAG tools integration with Azure AI Search
+   - Static file serving for audio assets
 
-[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&skip_quickstart=true&machine=basicLinux32gb&repo=860141324&devcontainer_path=.devcontainer%2Fdevcontainer.json&geo=WestUs2)
+3. **Azure Services**
+   - OpenAI Realtime API for voice conversation
+   - AI Search for Arabic knowledge retrieval
+   - Secure authentication and API management
 
-Once the codespace opens (this may take several minutes), open a new terminal and proceed to [deploy the app](#deploying-the-app).
+## 🚀 Quick Start
 
-### VS Code Dev Containers
+### Prerequisites
 
-You can run the project in your local VS Code Dev Container using the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
+- **Python 3.12+** with pip
+- **Node.js 18+** with npm
+- **Azure subscription** with:
+  - Azure OpenAI Realtime API access
+  - Azure AI Search service
+- **Git** for version control
 
-1. Start Docker Desktop (install it if not already installed)
-2. Open the project:
+### 1. Clone and Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/AliArabi55/aisearch-openai-rag-audio
+cd aisearch-openai-rag-audio
+
+# Create Python virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install backend dependencies
+cd app/backend
+pip install -r requirements.txt
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+npm run build
+```
+
+### 3. Configure Environment
+
+Create `.env` file in `app/backend/`:
+
+```env
+# Azure OpenAI Configuration
+AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com
+AZURE_OPENAI_REALTIME_DEPLOYMENT=gpt-4o-mini-realtime-preview
+AZURE_OPENAI_API_KEY=your_openai_api_key
+AZURE_OPENAI_REALTIME_VOICE_CHOICE=alloy
+
+# Azure AI Search Configuration
+AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
+AZURE_SEARCH_INDEX=your-index-name
+AZURE_SEARCH_API_KEY=your_search_api_key
+
+# RAG Configuration
+AZURE_SEARCH_IDENTIFIER_FIELD=ID
+AZURE_SEARCH_TITLE_FIELD=Name
+AZURE_SEARCH_CONTENT_FIELD=ingredients
+AZURE_SEARCH_USE_VECTOR_QUERY=false
+```
+
+### 4. Prepare Audio Files
+
+Ensure these audio files are in `app/backend/static/audio/`:
+- `Ran.mp3` - System startup sound (3 seconds)
+- `between.wav` - Transition sound (1 second)  
+- `Nancy.wav` - Welcome message (2 seconds)
+
+### 5. Run the Application
+
+```bash
+# From app/backend directory
+cd app/backend
+python app.py
+```
+
+Open your browser to: **http://localhost:8765**
+
+## 🎯 How to Use
+
+1. **🟣 Click the purple button** to start the audio sequence
+2. **🎵 Listen to the 3-sound sequence** (takes ~6 seconds total)
+3. **🎤 Start speaking** when the ready indicator appears
+4. **💬 Have a conversation** in Arabic or English
+5. **🔍 Ask about products**: "أبحث عن بيتزا فراخ كرسبي" or "Show me crispy chicken pizza"
+6. **📊 Get detailed responses** with prices, ingredients, and suggestions
+
+## 🔍 Arabic RAG Capabilities
+
+### Sample Interactions
+
+**Arabic Query:**
+```
+User: "عايز أطلب كالزونى فراخ كرسبي كبير"
+
+Response: 
+🍽️ [1] كالزونى فراخ كرسبي كبير
+المكونات: صلصه - فلفل - زيتون - موتزريلا - فراخ كرسبي  
+السعر: 180 جنيه
+```
+
+**English Query:**
+```
+User: "I want crispy chicken calzone"
+
+Response:
+🍽️ [1] Crispy Chicken Calzone Large
+Ingredients: Sauce - Peppers - Olives - Mozzarella - Crispy Chicken
+Price: 180 EGP
+```
+
+### Smart Search Features
+
+- **Multi-language support** - Arabic and English queries
+- **Partial matching** - "فراخ" finds all chicken items
+- **Context awareness** - Understands intent and preferences
+- **Smart suggestions** - Recommendations when no exact matches
+
+## 📊 Sample Data Structure
+
+The application works with structured menu data:
+
+```json
+{
+  "ID": "1",
+  "Name": "كالزونى فراخ كرسبي كبير",
+  "ingredients": "صلصه - فلفل - زيتون - موتزريلا - فراخ كرسبي",
+  "Price": "180"
+}
+```
+
+Supports various food categories:
+- **Pizza** (بيتزا): Various toppings and sizes
+- **Burgers** (برجر): Beef, chicken, specialty options
+- **Calzones** (كالزونى): Different fillings and sizes
+- **Sides** (مقبلات): Onion rings, appetizers
+
+## 🛠️ Development Guide
+
+### Project Structure
+
+```
+aisearch-openai-rag-audio/
+├── app/
+│   ├── backend/              # Python aiohttp server
+│   │   ├── app.py           # Main application entry
+│   │   ├── ragtools.py      # RAG + Azure Search integration
+│   │   ├── rtmt.py          # Realtime API middleware
+│   │   └── static/          # Audio files & frontend build
+│   │       ├── audio/       # Ran.mp3, between.wav, Nancy.wav
+│   │       └── assets/      # React build output
+│   └── frontend/            # React/TypeScript interface
+│       ├── src/
+│       │   ├── components/  # Audio player, voice recorder
+│       │   ├── hooks/       # Audio sequence logic
+│       │   └── types.ts     # TypeScript definitions
+│       ├── package.json
+│       └── vite.config.ts
+├── data/                    # Sample Arabic restaurant data
+├── infra/                   # Azure infrastructure (Bicep)
+├── docs/                    # Documentation and diagrams
+└── tests/                   # Test files and scripts
+```
+
+### Key Technologies
+
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Backend**: Python 3.12, aiohttp, asyncio
+- **Audio**: Web Audio API, AudioWorklet, WebRTC
+- **Azure Services**: OpenAI Realtime API, AI Search, Container Apps
+- **Infrastructure**: Bicep templates, GitHub Actions
+
+### Development Workflow
+
+```bash
+# Start development servers
+cd app/frontend
+npm run dev          # Frontend dev server (port 5173)
+
+cd app/backend  
+python app.py        # Backend server (port 8765)
+```
+
+## 📈 Performance Metrics
+
+### Target Performance
+- **Audio sequence duration**: 6 seconds total
+- **Search response time**: < 200ms
+- **Voice latency**: < 500ms end-to-end
+- **Memory usage**: < 512MB total
+- **Startup time**: < 3 seconds
+
+### Monitoring
+The application includes built-in performance monitoring:
+- Audio sequence timing
+- Search query performance
+- WebSocket connection health
+- Error rate tracking
+
+## 🔧 Customization
+
+### Audio Files
+Replace default audio files with your own:
+```bash
+# Copy your custom audio files
+cp your-startup.mp3 app/backend/static/audio/Ran.mp3
+cp your-transition.wav app/backend/static/audio/between.wav
+cp your-welcome.wav app/backend/static/audio/Nancy.wav
+```
+
+### Search Configuration
+Modify search behavior in `ragtools.py`:
+```python
+# Custom search parameters
+search_config = {
+    "query_type": "simple",
+    "search_mode": "any",
+    "top": 10,  # More results
+    "minimum_coverage": 80
+}
+```
+
+### UI Customization
+Update the React components in `app/frontend/src/components/` to match your brand and requirements.
+
+## 🚀 Deployment Options
+
+### 1. Azure Container Apps (Recommended)
+```bash
+# Deploy to Azure using provided infrastructure
+azd up
+```
+
+### 2. Docker Deployment
+```bash
+# Build and run with Docker
+docker build -t voicerag-app .
+docker run -p 8765:8765 voicerag-app
+```
+
+### 3. Manual Deployment
+Deploy to any cloud provider supporting Python web applications.
+
+## 📖 Documentation
+
+### Complete Guides
+- 📋 **[Arabic Documentation](README_Arabic.md)** - Complete guide in Arabic
+- 🏗️ **[Architecture Guide](ARCHITECTURE.md)** - Detailed system architecture
+- 🎵 **[Audio Features](AUDIO_FEATURES.md)** - Audio sequence implementation
+- 🔧 **[Technical Guide](TECHNICAL_GUIDE.md)** - Advanced technical details
+
+### API References
+- **Azure OpenAI Realtime API**: [Official Documentation](https://learn.microsoft.com/azure/ai-services/openai/realtime-audio-quickstart)
+- **Azure AI Search**: [Search API Reference](https://docs.microsoft.com/azure/search/)
+
+## 🎯 Use Cases and Applications
+
+### 🍕 Smart Restaurant Ordering
+- Voice-based menu navigation
+- Multi-language order taking
+- Real-time inventory checking
+- Order customization and upselling
+
+### 🛒 E-commerce Voice Shopping
+- Product discovery through conversation
+- Voice-activated search and filtering
+- Personalized recommendations
+- Hands-free shopping experience
+
+### 📚 Knowledge Base Assistant
+- Voice-powered information retrieval
+- Multi-language support
+- Contextual follow-up questions
+- Real-time fact checking
+
+### 🏢 Customer Service Automation
+- Intelligent call routing
+- Multi-language support
+- Knowledge base integration
+- Escalation to human agents
+
+## 🔮 Roadmap and Future Features
+
+### Version 2.0 (Planned)
+- [ ] **Multi-language expansion** - English, French, Spanish support
+- [ ] **Voice emotion detection** - Sentiment analysis and adaptive responses
+- [ ] **Custom voice models** - Personalized voice experiences
+- [ ] **Advanced analytics** - Usage patterns and conversation insights
+
+### Version 3.0 (Future)
+- [ ] **Offline mode** - Local processing for sensitive environments
+- [ ] **Integration APIs** - Easy integration with external systems
+- [ ] **White-label solution** - Customizable for different industries
+- [ ] **Mobile applications** - Native iOS and Android apps
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how you can help:
+
+### Ways to Contribute
+1. **🐛 Bug Reports** - Report issues and help improve stability
+2. **💡 Feature Requests** - Suggest new capabilities and improvements  
+3. **📝 Documentation** - Help improve guides and examples
+4. **🔧 Code Contributions** - Submit pull requests with enhancements
+5. **🌍 Translations** - Add support for additional languages
+
+### Development Setup
+```bash
+# Fork and clone the repository
+git clone https://github.com/your-username/aisearch-openai-rag-audio
+cd aisearch-openai-rag-audio
+
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Make your changes and test thoroughly
+# Submit a pull request with clear description
+```
+
+### Code Standards
+- Follow existing code style and patterns
+- Add tests for new functionality
+- Update documentation for changes
+- Ensure all tests pass before submitting
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Third-Party Licenses
+- React: MIT License
+- Azure SDK: MIT License
+- Other dependencies: See package.json files
+
+## 🆘 Support and Community
+
+### Getting Help
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AliArabi55/aisearch-openai-rag-audio/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/AliArabi55/aisearch-openai-rag-audio/discussions)
+- 📖 **Documentation**: [Project Wiki](https://github.com/AliArabi55/aisearch-openai-rag-audio/wiki)
+- 💡 **Feature Requests**: [GitHub Issues](https://github.com/AliArabi55/aisearch-openai-rag-audio/issues)
+
+### Community Guidelines
+- Be respectful and inclusive
+- Help others learn and grow
+- Share knowledge and experiences
+- Follow our [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## 🙏 Acknowledgments
+
+### Special Thanks
+- **Azure OpenAI Team** - For the incredible Realtime API
+- **Azure AI Search Team** - For excellent Arabic language support
+- **Open Source Community** - For inspiration and collaboration
+- **Contributors** - Everyone who helps improve this project
+
+### Built With
+- [Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service) - Realtime voice capabilities
+- [Azure AI Search](https://azure.microsoft.com/products/search) - Intelligent search with Arabic support
+- [React](https://reactjs.org/) - Frontend user interface
+- [Python](https://www.python.org/) - Backend server implementation
+
+---
+
+## 🌟 Star History
+
+If you find this project helpful, please consider giving it a star! ⭐
+
+**Made with ❤️ for the global developer community**
+
+*Experience the future of voice AI with seamless multilingual conversation and intelligent search capabilities.*
+
+---
+
+*Last updated: September 2025 | Version 1.0.0*
 
     [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/aisearch-openai-rag-audio)
 3. In the VS Code window that opens, once the project files show up (this may take several minutes), open a new terminal, and proceed to [deploying the app](#deploying-the-app).
