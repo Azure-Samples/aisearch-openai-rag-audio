@@ -58,21 +58,37 @@ async def _search_tool(
     use_vector_query: bool,
     args: Any) -> ToolResult:
     print(f"Searching for '{args['query']}' in the knowledge base.")
-    # Hybrid query using Azure AI Search with (optional) Semantic Ranker
-    vector_queries = []
-    if use_vector_query:
-        vector_queries.append(VectorizableTextQuery(text=args['query'], k_nearest_neighbors=50, fields=embedding_field))
+    print(f"Using fields: ID={identifier_field}, Content={content_field}")
+    
+    # Simple text search in Azure AI Search (no vector search, no semantic search)
     search_results = await search_client.search(
         search_text=args["query"], 
-        query_type="semantic" if semantic_configuration else "simple",
-        semantic_configuration_name=semantic_configuration,
+        query_type="simple",  # استخدام البحث النصي البسيط فقط
         top=5,
-        vector_queries=vector_queries,
-        select=", ".join([identifier_field, content_field])
+        select=f"{identifier_field},Name,{content_field},Price"  # تحديد الحقول المطلوبة
     )
+    
     result = ""
+    result_count = 0
     async for r in search_results:
-        result += f"[{r[identifier_field]}]: {r[content_field]}\n-----\n"
+        result_count += 1
+        print(f"Search result {result_count}: {r}")  # طباعة النتيجة الكاملة
+        
+        # استخدام الحقول الصحيحة
+        id_field = r.get(identifier_field, f"Item_{result_count}")
+        name_field = r.get('Name', "Unknown Item")
+        content_field_value = r.get(content_field, "No description available")
+        price = r.get('Price', 'سعر غير محدد')
+        
+        # عرض النتائج بصيغة: [ID]: Name - ingredients (Price جنيه)
+        result += f"[{id_field}]: {name_field} - {content_field_value} ({price} جنيه)\n-----\n"
+    
+    if result_count == 0:
+        print("No search results found!")
+        result = "ليس عندي."
+    else:
+        print(f"Found {result_count} results")
+    
     return ToolResult(result, ToolResultDirection.TO_SERVER)
 
 KEY_PATTERN = re.compile(r'^[a-zA-Z0-9_=\-]+$')
@@ -83,21 +99,16 @@ async def _report_grounding_tool(search_client: SearchClient, identifier_field: 
     sources = [s for s in args["sources"] if KEY_PATTERN.match(s)]
     list = " OR ".join(sources)
     print(f"Grounding source: {list}")
-    # Use search instead of filter to align with how detailt integrated vectorization indexes
-    # are generated, where chunk_id is searchable with a keyword tokenizer, not filterable 
+    # Use search instead of filter to align with how the index is structured
     search_results = await search_client.search(search_text=list, 
                                                 search_fields=[identifier_field], 
                                                 select=[identifier_field, title_field, content_field], 
                                                 top=len(sources), 
                                                 query_type="full")
     
-    # If your index has a key field that's filterable but not searchable and with the keyword analyzer, you can 
-    # use a filter instead (and you can remove the regex check above, just ensure you escape single quotes)
-    # search_results = await search_client.search(filter=f"search.in(chunk_id, '{list}')", select=["chunk_id", "title", "chunk"])
-
     docs = []
     async for r in search_results:
-        docs.append({"chunk_id": r[identifier_field], "title": r[title_field], "chunk": r[content_field]})
+        docs.append({"ID": r[identifier_field], "Name": r[title_field], "ingredients": r[content_field]})
     return ToolResult({"sources": docs}, ToolResultDirection.TO_CLIENT)
 
 def attach_rag_tools(rtmt: RTMiddleTier,
