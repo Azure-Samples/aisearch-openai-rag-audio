@@ -123,6 +123,8 @@ If no → calculate the total and say:
     current_directory = Path(__file__).parent
     app.add_routes([web.get('/', lambda _: web.FileResponse(current_directory / 'static/index.html'))])
     app.router.add_static('/', path=current_directory / 'static', name='static')
+    # إضافة route منفصل للملفات الصوتية
+    app.router.add_static('/audio', path=current_directory / 'static/audio', name='audio')
     
     return app
 
