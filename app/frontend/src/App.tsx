@@ -10,6 +10,7 @@ import StatusMessage from "@/components/ui/status-message";
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
 import useAudioPlayer from "@/hooks/useAudioPlayer";
+import useAudioSequence from "@/hooks/useAudioSequence";
 
 import { GroundingFile, ToolResult } from "./types";
 
@@ -17,6 +18,7 @@ import logo from "./assets/logo.svg";
 
 function App() {
     const [isRecording, setIsRecording] = useState(false);
+    const [isPlayingSequence, setIsPlayingSequence] = useState(false);
     const [groundingFiles, setGroundingFiles] = useState<GroundingFile[]>([]);
     const [selectedFile, setSelectedFile] = useState<GroundingFile | null>(null);
 
@@ -29,6 +31,7 @@ function App() {
             isRecording && playAudio(message.delta);
         },
         onReceivedInputAudioBufferSpeechStarted: () => {
+            console.log("Speech started detected");
             stopAudioPlayer();
         },
         onReceivedExtensionMiddleTierToolResponse: message => {
@@ -45,18 +48,36 @@ function App() {
     const { reset: resetAudioPlayer, play: playAudio, stop: stopAudioPlayer } = useAudioPlayer();
     const { start: startAudioRecording, stop: stopAudioRecording } = useAudioRecorder({ onAudioRecorded: addUserAudio });
 
-    const onToggleListening = async () => {
-        if (!isRecording) {
+    // Hook للتسلسل الصوتي
+    const { playAudioSequence } = useAudioSequence({
+        onSequenceComplete: async () => {
+            // بعد انتهاء تسلسل الأصوات بالكامل، بدء الريل تايم
+            console.log('Audio sequence completed, starting realtime...');
+            setIsPlayingSequence(false);
+            setIsRecording(true);
+            
+            // بدء جلسة الريل تايم
             startSession();
+            
+            // بدء تسجيل الصوت
             await startAudioRecording();
             resetAudioPlayer();
+        }
+    });
 
-            setIsRecording(true);
-        } else {
+    const onToggleListening = async () => {
+        console.log('onToggleListening called. isRecording:', isRecording, 'isPlayingSequence:', isPlayingSequence);
+        
+        if (!isRecording && !isPlayingSequence) {
+            // بدء تسلسل الأصوات
+            console.log('Starting audio sequence...');
+            setIsPlayingSequence(true);
+            playAudioSequence();
+        } else if (isRecording) {
+            console.log('Stopping recording...');
             await stopAudioRecording();
             stopAudioPlayer();
             inputAudioBufferClear();
-
             setIsRecording(false);
         }
     };
@@ -75,21 +96,40 @@ function App() {
                 <div className="mb-4 flex flex-col items-center justify-center">
                     <Button
                         onClick={onToggleListening}
-                        className={`h-12 w-60 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-purple-500 hover:bg-purple-600"}`}
-                        aria-label={isRecording ? t("app.stopRecording") : t("app.startRecording")}
+                        className={`h-12 w-60 ${
+                            isRecording 
+                                ? "bg-red-600 hover:bg-red-700" 
+                                : isPlayingSequence 
+                                    ? "bg-yellow-500 hover:bg-yellow-600" 
+                                    : "bg-purple-500 hover:bg-purple-600"
+                        }`}
+                        disabled={isPlayingSequence}
+                        aria-label={
+                            isRecording 
+                                ? t("app.stopRecording") 
+                                : isPlayingSequence 
+                                    ? "جاري التحضير..." 
+                                    : t("app.startRecording")
+                        }
                     >
                         {isRecording ? (
                             <>
                                 <MicOff className="mr-2 h-4 w-4" />
                                 {t("app.stopConversation")}
                             </>
+                        ) : isPlayingSequence ? (
+                            <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                جاري التحضير...
+                            </>
                         ) : (
                             <>
                                 <Mic className="mr-2 h-6 w-6" />
+                                اتصال
                             </>
                         )}
                     </Button>
-                    <StatusMessage isRecording={isRecording} />
+                    <StatusMessage isRecording={isRecording} isPlayingSequence={isPlayingSequence} />
                 </div>
                 <GroundingFiles files={groundingFiles} onSelected={setSelectedFile} />
             </main>
