@@ -13,6 +13,9 @@ This repo contains an example of how to implement RAG support in applications th
   * [Local environment](#local-environment)
 * [Deploying the app](#deploying-the-app)
 * [Development server](#development-server)
+* [Guidance](#guidance)
+* [Resources](#resources)
+* [Getting help](#getting-help)
 
 ## Features
 
@@ -175,3 +178,16 @@ This template uses [Managed Identity](https://learn.microsoft.com/entra/identity
 * [Blog post: VoiceRAG](https://aka.ms/voicerag)
 * [Demo video: VoiceRAG](https://youtu.be/vXJka8xZ9Ko)
 * [Azure OpenAI Realtime Documentation](https://github.com/Azure-Samples/aoai-realtime-audio-sdk/)
+
+### Getting help
+
+This is a sample built to demonstrate the capabilities of modern Generative AI apps and how they can be built in Azure. For help with deploying this sample, please post in [GitHub Issues](/issues). If you're a Microsoft employee, you can also post in [our Teams channel](https://aka.ms/azai-python-help).
+
+This repository is supported by the maintainers, _not_ by Microsoft Support,
+so please use the support mechanisms described above, and we will do our best to help you out.
+
+For general questions about developing AI solutions on Azure,
+join the Azure AI Foundry Developer Community:
+
+[![Azure AI Foundry Discord](https://img.shields.io/badge/Discord-Azure_AI_Foundry_Community_Discord-blue?style=for-the-badge&logo=discord&color=5865f2&logoColor=fff)](https://aka.ms/foundry/discord)
+[![Azure AI Foundry Developer Forum](https://img.shields.io/badge/GitHub-Azure_AI_Foundry_Developer_Forum-blue?style=for-the-badge&logo=github&color=000000&logoColor=fff)](https://aka.ms/foundry/forum)
