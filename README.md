@@ -13,6 +13,9 @@ This repo contains an example of how to implement RAG support in applications th
   * [Local environment](#local-environment)
 * [Deploying the app](#deploying-the-app)
 * [Development server](#development-server)
+* [Guidance](#guidance)
+* [Resources](#resources)
+* [Getting help](#getting-help)
 
 ## Features
 
