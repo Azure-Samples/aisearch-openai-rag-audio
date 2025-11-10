@@ -3,10 +3,16 @@ import { useTranslation } from "react-i18next";
 
 type Properties = {
     isRecording: boolean;
+    isPlayingSequence?: boolean;
 };
 
-export default function StatusMessage({ isRecording }: Properties) {
+export default function StatusMessage({ isRecording, isPlayingSequence = false }: Properties) {
     const { t } = useTranslation();
+    
+    if (isPlayingSequence) {
+        return <p className="text mb-4 mt-6 text-yellow-600">جاري تحضير الاتصال... استمع للتعليمات</p>;
+    }
+    
     if (!isRecording) {
         return <p className="text mb-4 mt-6">{t("status.notRecordingMessage")}</p>;
     }
