@@ -118,6 +118,8 @@ class ConfigurationTests(unittest.TestCase):
         self.assertIn("openIdIssuer: '${environment().authentication.loginEndpoint}${authTenantId}/v2.0'", module)
         self.assertIn("authClientId", params)
         self.assertIn("authClientSecret", params)
+        self.assertEqual(params["authClientId"]["value"], "${AZURE_CONTAINER_APP_AUTH_CLIENT_ID=}")
+        self.assertEqual(params["authClientSecret"]["value"], "${AZURE_CONTAINER_APP_AUTH_CLIENT_SECRET=}")
 
     def test_authentication_defaults_to_disabled(self):
         with patch.dict(os.environ, {}, clear=True):

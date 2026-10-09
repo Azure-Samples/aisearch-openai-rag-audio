@@ -36,10 +36,10 @@
       "value": "${AZURE_OPENAI_REALTIME_VOICE_CHOICE=alloy}"
     },
     "authClientId": {
-      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_ID}"
+      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_ID=}"
     },
     "authClientSecret": {
-      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_SECRET}"
+      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_SECRET=}"
     },
     "searchIndexName": {
       "value": "${AZURE_SEARCH_INDEX=voicerag-intvect}"
