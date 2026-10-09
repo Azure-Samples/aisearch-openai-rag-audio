@@ -41,9 +41,9 @@ class Tool:
 
 class RTToolCall:
     tool_call_id: str
-    previous_id: str
+    previous_id: Optional[str]
 
-    def __init__(self, tool_call_id: str, previous_id: str):
+    def __init__(self, tool_call_id: str, previous_id: Optional[str]):
         self.tool_call_id = tool_call_id
         self.previous_id = previous_id
 
@@ -114,11 +114,11 @@ class RTMiddleTier:
                     if "item" in message and message["item"]["type"] == "function_call":
                         updated_message = None
 
-                case "conversation.item.created":
+                case "conversation.item.created" | "conversation.item.added" | "conversation.item.done":
                     if "item" in message and message["item"]["type"] == "function_call":
                         item = message["item"]
                         if item["call_id"] not in self._tools_pending:
-                            self._tools_pending[item["call_id"]] = RTToolCall(item["call_id"], message["previous_item_id"])
+                            self._tools_pending[item["call_id"]] = RTToolCall(item["call_id"], message.get("previous_item_id"))
                         updated_message = None
                     elif "item" in message and message["item"]["type"] == "function_call_output":
                         updated_message = None

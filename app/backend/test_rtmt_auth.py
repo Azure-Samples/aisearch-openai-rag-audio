@@ -193,8 +193,10 @@ class RealtimeGATests(unittest.IsolatedAsyncioTestCase):
             if event["type"] == "session.update":
                 await ws.send_json({"type": "session.updated", "session": {"type": "realtime"}})
                 if self.simulate_tool:
-                    await ws.send_json({"type": "conversation.item.created",
+                    await ws.send_json({"type": "conversation.item.added",
                                         "previous_item_id": "item-1",
+                                        "item": {"type": "function_call", "call_id": "call-1"}})
+                    await ws.send_json({"type": "conversation.item.done",
                                         "item": {"type": "function_call", "call_id": "call-1"}})
                     await ws.send_json({"type": "response.output_item.done",
                                         "item": {"type": "function_call", "call_id": "call-1",
@@ -240,6 +242,8 @@ class RealtimeGATests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(outputs), 1)
         self.assertEqual(outputs[0]["item"]["output"], "synthetic quince")
         search.assert_awaited_once_with({"query": "canary"})
+        with self.assertRaises(asyncio.TimeoutError):
+            await ws.receive_json(timeout=0.2)
         await ws.close()
 
 if __name__ == "__main__":
