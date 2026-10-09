@@ -75,6 +75,12 @@ param openAiEndpoint string = ''
 param openAiRealtimeDeployment string = ''
 param openAiRealtimeVoiceChoice string = ''
 
+@description('Entra application client ID for protecting the web app; without both auth inputs, external ingress stays disabled.')
+param authClientId string = ''
+@secure()
+param authClientSecret string = ''
+var authConfigured = !empty(authClientId) && !empty(authClientSecret)
+
 @description('Location for the OpenAI resource group')
 @allowed([
   'eastus2'
@@ -195,6 +201,10 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     identityType: 'UserAssigned'
+    external: authConfigured
+    authClientId: authConfigured ? authClientId : ''
+    authTenantId: tenantId
+    secrets: authConfigured ? { 'auth-client-secret': authClientSecret } : {}
     tags: union(tags, { 'azd-service-name': 'backend' })
     targetPort: 8000
     containerCpuCoreCount: '1.0'
@@ -215,6 +225,7 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
       AZURE_OPENAI_REALTIME_VOICE_CHOICE: openAiRealtimeVoiceChoice
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
+      VOICE_RAG_AUTH_MODE: authConfigured ? 'container_apps' : 'disabled'
       // For using managed identity to access Azure resources. See https://github.com/microsoft/azure-container-apps/issues/442
       AZURE_CLIENT_ID: acaIdentity.outputs.clientId
     }

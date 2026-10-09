@@ -1,8 +1,11 @@
 import asyncio
+import base64
+import binascii
 import json
 import logging
 from enum import Enum
 from typing import Any, Callable, Optional
+from urllib.parse import urlsplit
 
 import aiohttp
 from aiohttp import web
@@ -65,7 +68,10 @@ class RTMiddleTier:
     _tools_pending = {}
     _token_provider = None
 
-    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None):
+    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None, auth_mode: str = "disabled"):
+        if auth_mode not in ("disabled", "container_apps", "local"):
+            raise ValueError("Invalid realtime authentication mode")
+        self.auth_mode = auth_mode
         self.endpoint = endpoint
         self.deployment = deployment
         self.voice_choice = voice_choice
@@ -219,10 +225,45 @@ class RTMiddleTier:
                     pass
 
     async def _websocket_handler(self, request: web.Request):
+        if self.auth_mode == "local":
+            peer = request.transport.get_extra_info("peername") if request.transport else None
+            if not peer or peer[0] not in ("127.0.0.1", "::1"):
+                raise web.HTTPUnauthorized()
+        elif self.auth_mode != "container_apps" or not self._has_platform_identity(request):
+            raise web.HTTPUnauthorized()
+
+        origin = request.headers.get("Origin")
+        if origin:
+            try:
+                parsed = urlsplit(origin)
+            except ValueError:
+                raise web.HTTPForbidden(text="Invalid WebSocket origin") from None
+            scheme = "https" if self.auth_mode == "container_apps" else request.scheme
+            if parsed.scheme != scheme or parsed.netloc != request.host or parsed.path or parsed.query or parsed.fragment:
+                raise web.HTTPForbidden(text="Cross-origin WebSocket requests are not allowed")
+
         ws = web.WebSocketResponse()
         await ws.prepare(request)
         await self._forward_messages(ws)
         return ws
-    
+
+    @staticmethod
+    def _has_platform_identity(request: web.Request) -> bool:
+        # Only trust this header behind Container Apps auth with Require authentication.
+        encoded = request.headers.get("X-MS-CLIENT-PRINCIPAL", "")
+        try:
+            principal = json.loads(base64.b64decode(encoded, validate=True))
+        except (binascii.Error, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+            return False
+        if not isinstance(principal, dict) or principal.get("auth_typ") != "aad":
+            return False
+        claims = principal.get("claims")
+        return isinstance(claims, list) and any(
+            isinstance(claim, dict)
+            and claim.get("typ") in ("oid", "http://schemas.microsoft.com/identity/claims/objectidentifier")
+            and isinstance(claim.get("val"), str) and bool(claim["val"].strip())
+            for claim in claims
+        )
+
     def attach_to_app(self, app, path):
         app.router.add_get(path, self._websocket_handler)

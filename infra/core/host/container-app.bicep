@@ -50,6 +50,9 @@ param external bool = true
 @description('The name of the user-assigned identity')
 param identityName string = ''
 
+param authClientId string = ''
+param authTenantId string = ''
+
 @description('The type of identity for the resource')
 @allowed([ 'None', 'SystemAssigned', 'UserAssigned' ])
 param identityType string = 'None'
@@ -167,6 +170,33 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
       scale: {
         minReplicas: containerMinReplicas
         maxReplicas: containerMaxReplicas
+      }
+    }
+  }
+}
+
+resource authConfig 'Microsoft.App/containerApps/authConfigs@2024-03-01' = if (!empty(authClientId)) {
+  parent: app
+  name: 'current'
+  properties: {
+    platform: {
+      enabled: true
+    }
+    globalValidation: {
+      unauthenticatedClientAction: 'RedirectToLoginPage'
+      redirectToProvider: 'aad'
+    }
+    httpSettings: {
+      requireHttps: true
+    }
+    identityProviders: {
+      azureActiveDirectory: {
+        enabled: true
+        registration: {
+          clientId: authClientId
+          clientSecretSettingName: 'auth-client-secret'
+          openIdIssuer: '${environment().authentication.loginEndpoint}${authTenantId}/v2.0'
+        }
       }
     }
   }
