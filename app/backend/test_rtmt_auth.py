@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import os
@@ -9,7 +10,7 @@ from aiohttp import web
 from aiohttp.test_utils import TestClient, TestServer, make_mocked_request
 from azure.core.credentials import AzureKeyCredential
 
-from rtmt import RTMiddleTier
+from rtmt import RTMiddleTier, Tool, ToolResult, ToolResultDirection
 from app import realtime_auth_mode
 
 
@@ -120,6 +121,9 @@ class ConfigurationTests(unittest.TestCase):
         self.assertIn("authClientSecret", params)
         self.assertEqual(params["authClientId"]["value"], "${AZURE_CONTAINER_APP_AUTH_CLIENT_ID=}")
         self.assertEqual(params["authClientSecret"]["value"], "${AZURE_CONTAINER_APP_AUTH_CLIENT_SECRET=}")
+        self.assertEqual(params["realtimeModelName"]["value"], "${AZURE_OPENAI_REALTIME_MODEL=gpt-4o-realtime-preview}")
+        self.assertEqual(params["realtimeApiMode"]["value"], "${AZURE_OPENAI_REALTIME_API_MODE=preview}")
+        self.assertIn("VOICE_RAG_REALTIME_API_MODE: realtimeApiMode", main)
 
     def test_authentication_defaults_to_disabled(self):
         with patch.dict(os.environ, {}, clear=True):
@@ -147,6 +151,96 @@ class ConfigurationTests(unittest.TestCase):
         with patch.dict(os.environ, {"VOICE_RAG_AUTH_MODE": "container_apps"}, clear=True):
             self.assertEqual(realtime_auth_mode(), "container_apps")
 
+    def test_invalid_realtime_api_mode_is_rejected(self):
+        with self.assertRaises(ValueError):
+            RTMiddleTier("https://example.invalid", "test", AzureKeyCredential("unused"),
+                         realtime_api="unknown")
+
+
+class RealtimeGATests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.received = []
+        self.simulate_tool = False
+        self.upstream = TestServer(web.Application())
+        self.upstream.app.router.add_get("/openai/v1/realtime", self.fake_upstream)
+        await self.upstream.start_server()
+
+        self.tier = RTMiddleTier(str(self.upstream.make_url("/").origin()), "mini-canary",
+                                 AzureKeyCredential("unused"), voice_choice="alloy",
+                                 auth_mode="local", realtime_api="ga")
+        self.tier.system_message = "Use the search tool."
+        app = web.Application()
+        self.tier.attach_to_app(app, "/realtime")
+        self.client = TestClient(TestServer(app))
+        await self.client.start_server()
+
+    async def asyncTearDown(self):
+        await self.client.close()
+        await self.upstream.close()
+
+    async def fake_upstream(self, request):
+        self.assertEqual(request.query.get("model"), "mini-canary")
+        self.assertNotIn("api-version", request.query)
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+        await ws.send_json({"type": "session.created", "session": {
+            "id": "canary-session", "instructions": "server-only", "tools": [],
+            "audio": {"output": {"voice": "alloy"}},
+        }})
+        async for msg in ws:
+            event = json.loads(msg.data)
+            self.received.append(event)
+            if event["type"] == "session.update":
+                await ws.send_json({"type": "session.updated", "session": {"type": "realtime"}})
+                if self.simulate_tool:
+                    await ws.send_json({"type": "conversation.item.created",
+                                        "previous_item_id": "item-1",
+                                        "item": {"type": "function_call", "call_id": "call-1"}})
+                    await ws.send_json({"type": "response.output_item.done",
+                                        "item": {"type": "function_call", "call_id": "call-1",
+                                                 "name": "search", "arguments": '{"query":"canary"}'}})
+                else:
+                    await ws.send_json({"type": "response.output_audio.delta", "delta": "YQ=="})
+        return ws
+
+    async def test_ga_websocket_uses_supported_route_and_session_schema(self):
+        ws = await self.client.ws_connect("/realtime")
+        created = await ws.receive_json(timeout=5)
+        self.assertEqual(created["type"], "session.created")
+        self.assertEqual(created["session"]["instructions"], "")
+        await ws.send_json({"type": "session.update", "session": {
+            "turn_detection": {"type": "server_vad"}
+        }})
+        self.assertEqual((await ws.receive_json(timeout=5))["type"], "session.updated")
+        audio = await ws.receive_json(timeout=5)
+        self.assertEqual(audio, {"type": "response.audio.delta", "delta": "YQ=="})
+        update = self.received[0]["session"]
+        self.assertEqual(update["type"], "realtime")
+        self.assertEqual(update["audio"]["input"]["turn_detection"]["type"], "server_vad")
+        self.assertEqual(update["audio"]["output"]["voice"], "alloy")
+        self.assertEqual(update["instructions"], "Use the search tool.")
+        self.assertNotIn("voice", update)
+        self.assertNotIn("turn_detection", update)
+        await ws.close()
+
+    async def test_ga_function_call_receives_search_result(self):
+        self.simulate_tool = True
+        search = AsyncMock(return_value=ToolResult("synthetic quince", ToolResultDirection.TO_SERVER))
+        self.tier.tools = {"search": Tool(search, {"type": "function", "name": "search",
+                                                   "parameters": {"type": "object", "properties": {}}})}
+        ws = await self.client.ws_connect("/realtime")
+        self.assertEqual((await ws.receive_json(timeout=5))["type"], "session.created")
+        await ws.send_json({"type": "session.update", "session": {}})
+        self.assertEqual((await ws.receive_json(timeout=5))["type"], "session.updated")
+        for _ in range(10):
+            if any(event["type"] == "conversation.item.create" for event in self.received):
+                break
+            await asyncio.sleep(0.02)
+        outputs = [event for event in self.received if event["type"] == "conversation.item.create"]
+        self.assertEqual(len(outputs), 1)
+        self.assertEqual(outputs[0]["item"]["output"], "synthetic quince")
+        search.assert_awaited_once_with({"query": "canary"})
+        await ws.close()
 
 if __name__ == "__main__":
     unittest.main()

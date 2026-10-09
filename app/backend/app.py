@@ -56,6 +56,7 @@ async def create_app():
         deployment=os.environ["AZURE_OPENAI_REALTIME_DEPLOYMENT"],
         voice_choice=os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE") or "alloy",
         auth_mode=auth_mode,
+        realtime_api=os.environ.get("VOICE_RAG_REALTIME_API_MODE", "preview"),
         )
     rtmt.system_message = """
         You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. 

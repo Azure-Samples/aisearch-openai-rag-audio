@@ -95,6 +95,9 @@ param openAiServiceLocation string
 
 param realtimeDeploymentCapacity int
 param realtimeDeploymentVersion string
+param realtimeModelName string = 'gpt-4o-realtime-preview'
+@allowed(['preview', 'ga'])
+param realtimeApiMode string = 'preview'
 param embeddingDeploymentCapacity int
 
 param tenantId string = tenant().tenantId
@@ -226,6 +229,7 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
       // CORS support, for frontends on other hosts
       RUNNING_IN_PRODUCTION: 'true'
       VOICE_RAG_AUTH_MODE: authConfigured ? 'container_apps' : 'disabled'
+      VOICE_RAG_REALTIME_API_MODE: realtimeApiMode
       // For using managed identity to access Azure resources. See https://github.com/microsoft/azure-container-apps/issues/442
       AZURE_CLIENT_ID: acaIdentity.outputs.clientId
     }
@@ -235,10 +239,10 @@ module acaBackend 'core/host/container-app-upsert.bicep' = {
 var embedModel = 'text-embedding-3-large'
 var openAiDeployments = [
   {
-    name: 'gpt-4o-realtime-preview'
+    name: realtimeModelName
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o-realtime-preview'
+      name: realtimeModelName
       version: realtimeDeploymentVersion
     }
     sku: {

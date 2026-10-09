@@ -45,3 +45,17 @@ For local development only, the server binds to `localhost`; setting
 WebSocket access. It is rejected with `RUNNING_IN_PRODUCTION`, and it must not
 be used with a forwarded port, a shared development environment, or private
 index contents.
+
+## Realtime model compatibility
+
+The original sample uses the `gpt-4o-realtime-preview` deployment and its
+date-versioned preview API. Where only a GA realtime deployment is available,
+set `AZURE_OPENAI_REALTIME_MODEL=gpt-realtime-mini`,
+`AZURE_OPENAI_REALTIME_DEPLOYMENT_VERSION=2025-10-06`, and
+`AZURE_OPENAI_REALTIME_API_MODE=ga` before provisioning; choose a
+[supported region and model version](https://learn.microsoft.com/azure/foundry/openai/how-to/realtime-audio).
+The middle tier then connects to `/openai/v1/realtime` and adapts the session
+audio configuration and event names for the existing browser client. When
+reusing an existing Azure OpenAI account, set the existing deployment name
+as usual and select the API mode that deployment supports. This setting does
+not replace visitor authentication or open the Container App's ingress.

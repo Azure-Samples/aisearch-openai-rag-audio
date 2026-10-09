@@ -68,10 +68,13 @@ class RTMiddleTier:
     _tools_pending = {}
     _token_provider = None
 
-    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None, auth_mode: str = "disabled"):
+    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None, auth_mode: str = "disabled", realtime_api: str = "preview"):
         if auth_mode not in ("disabled", "container_apps", "local"):
             raise ValueError("Invalid realtime authentication mode")
+        if realtime_api not in ("preview", "ga"):
+            raise ValueError("Invalid realtime API mode")
         self.auth_mode = auth_mode
+        self.realtime_api = realtime_api
         self.endpoint = endpoint
         self.deployment = deployment
         self.voice_choice = voice_choice
@@ -94,10 +97,18 @@ class RTMiddleTier:
                     # tools, this will need updating
                     session["instructions"] = ""
                     session["tools"] = []
-                    session["voice"] = self.voice_choice
+                    if self.realtime_api == "ga":
+                        session.get("audio", {}).get("output", {}).pop("voice", None)
+                    else:
+                        session["voice"] = self.voice_choice
                     session["tool_choice"] = "none"
                     session["max_response_output_tokens"] = None
                     updated_message = json.dumps(message)
+
+                case "response.output_audio.delta" | "response.output_audio_transcript.delta":
+                    if self.realtime_api == "ga":
+                        message["type"] = message["type"].replace("response.output_audio", "response.audio")
+                        updated_message = json.dumps(message)
 
                 case "response.output_item.added":
                     if "item" in message and message["item"]["type"] == "function_call":
@@ -168,6 +179,14 @@ class RTMiddleTier:
             match message["type"]:
                 case "session.update":
                     session = message["session"]
+                    if self.realtime_api == "ga":
+                        session["type"] = "realtime"
+                        audio = session.setdefault("audio", {})
+                        audio_input = audio.setdefault("input", {})
+                        if "turn_detection" in session:
+                            audio_input["turn_detection"] = session.pop("turn_detection")
+                        if "input_audio_transcription" in session:
+                            audio_input["transcription"] = session.pop("input_audio_transcription")
                     if self.system_message is not None:
                         session["instructions"] = self.system_message
                     if self.temperature is not None:
@@ -177,7 +196,10 @@ class RTMiddleTier:
                     if self.disable_audio is not None:
                         session["disable_audio"] = self.disable_audio
                     if self.voice_choice is not None:
-                        session["voice"] = self.voice_choice
+                        if self.realtime_api == "ga":
+                            audio.setdefault("output", {})["voice"] = self.voice_choice
+                        else:
+                            session["voice"] = self.voice_choice
                     session["tool_choice"] = "auto" if len(self.tools) > 0 else "none"
                     session["tools"] = [tool.schema for tool in self.tools.values()]
                     updated_message = json.dumps(message)
@@ -186,7 +208,12 @@ class RTMiddleTier:
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
-            params = { "api-version": self.api_version, "deployment": self.deployment}
+            if self.realtime_api == "ga":
+                path = "/openai/v1/realtime"
+                params = {"model": self.deployment}
+            else:
+                path = "/openai/realtime"
+                params = {"api-version": self.api_version, "deployment": self.deployment}
             headers = {}
             if "x-ms-client-request-id" in ws.headers:
                 headers["x-ms-client-request-id"] = ws.headers["x-ms-client-request-id"]
@@ -194,7 +221,7 @@ class RTMiddleTier:
                 headers = { "api-key": self.key }
             else:
                 headers = { "Authorization": f"Bearer {self._token_provider()}" } # NOTE: no async version of token provider, maybe refresh token on a timer?
-            async with session.ws_connect("/openai/realtime", headers=headers, params=params) as target_ws:
+            async with session.ws_connect(path, headers=headers, params=params) as target_ws:
                 async def from_client_to_server():
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.TEXT:
