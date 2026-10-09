@@ -53,6 +53,9 @@ param identityType string = 'None'
 @description('The name of the user-assigned identity')
 param identityName string = ''
 
+param authClientId string = ''
+param authTenantId string = ''
+
 @description('The name of the container image')
 param imageName string = ''
 
@@ -94,6 +97,8 @@ module app 'container-app.bicep' = {
     tags: tags
     identityType: identityType
     identityName: identityName
+    authClientId: authClientId
+    authTenantId: authTenantId
     ingressEnabled: ingressEnabled
     containerName: containerName
     containerAppsEnvironmentName: containerAppsEnvironmentName
