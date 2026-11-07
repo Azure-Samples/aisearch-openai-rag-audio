@@ -15,7 +15,7 @@ VoiceRAG is an application pattern demonstrating RAG (Retrieval Augmented Genera
 
 **Primary entry points:**
 - `app/backend/app.py` - Backend application server (aiohttp)
-- `app/frontend/src/main.tsx` - Frontend React application
+- `app/frontend/src/index.tsx` - Frontend React application
 - `scripts/start.sh` or `scripts/start.ps1` - Development server startup scripts
 
 ## Code layout
