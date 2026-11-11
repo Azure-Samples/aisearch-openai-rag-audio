@@ -35,6 +35,12 @@
     "openAiRealtimeVoiceChoice": {
       "value": "${AZURE_OPENAI_REALTIME_VOICE_CHOICE=alloy}"
     },
+    "authClientId": {
+      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_ID=}"
+    },
+    "authClientSecret": {
+      "value": "${AZURE_CONTAINER_APP_AUTH_CLIENT_SECRET=}"
+    },
     "searchIndexName": {
       "value": "${AZURE_SEARCH_INDEX=voicerag-intvect}"
     },
@@ -94,6 +100,12 @@
     },
     "realtimeDeploymentVersion": {
       "value": "${AZURE_OPENAI_REALTIME_DEPLOYMENT_VERSION=2024-12-17}"
+    },
+    "realtimeModelName": {
+      "value": "${AZURE_OPENAI_REALTIME_MODEL=gpt-4o-realtime-preview}"
+    },
+    "realtimeApiMode": {
+      "value": "${AZURE_OPENAI_REALTIME_API_MODE=preview}"
     },
     "embeddingDeploymentCapacity": {
       "value": "${AZURE_OPENAI_EMB_DEPLOYMENT_CAPACITY=30}"

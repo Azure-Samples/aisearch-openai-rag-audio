@@ -106,6 +106,8 @@ The steps below will provision Azure resources and deploy the application code t
 
 1. After the application has been successfully deployed you will see a URL printed to the console.  Navigate to that URL to interact with the app in your browser. To try out the app, click the "Start conversation button", say "Hello", and then ask a question about your data like "What is the whistleblower policy for Contoso electronics?" You can also now run the app locally by following the instructions in [the next section](#development-server).
 
+   **Access is private by default.** The initial deployment does not expose the app externally or allow `/realtime` connections. To enable browser access, configure [Microsoft Entra authentication for the Container App](docs/access_control.md) and redeploy. Do not expose a deployment containing private indexed data without authentication.
+
 ## Development server
 
 You can run this app locally using either the Azure services you provisioned by following the [deployment instructions](#deploying-the-app), or by pointing the local app at already [existing services](docs/existing_services.md).
@@ -127,6 +129,8 @@ You can run this app locally using either the Azure services you provisioned by 
    To use Entra ID (your user when running locally, managed identity when deployed) simply don't set the keys.
 
 3. Run this command to start the app:
+
+   The local development server binds to localhost. To use the voice interface locally without configuring Container Apps authentication, explicitly add `VOICE_RAG_ALLOW_ANONYMOUS_LOCAL=true` to `app/backend/.env`. This is only for a trusted local machine; never forward this port or use this setting in a shared environment.
 
    Windows:
 
@@ -168,6 +172,8 @@ either by deleting the resource group in the Portal or running `azd down`.
 ### Security
 
 This template uses [Managed Identity](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview) to eliminate the need for developers to manage these credentials. Applications can use managed identities to obtain Microsoft Entra tokens without having to manage any credentials.To ensure best practices in your repo we recommend anyone creating solutions based on our templates ensure that the [Github secret scanning](https://docs.github.com/code-security/secret-scanning/about-secret-scanning) setting is enabled in your repos.
+
+The backend's managed identity authenticates it to Azure AI Search and Azure OpenAI; it does **not** authenticate visitors to the app. See [app access control](docs/access_control.md) before sharing a deployed URL or indexing non-public data.
 
 ### Notes
 

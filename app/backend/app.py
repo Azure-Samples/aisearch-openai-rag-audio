@@ -13,10 +13,26 @@ from rtmt import RTMiddleTier
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("voicerag")
 
+def realtime_auth_mode():
+    auth_mode = os.environ.get("VOICE_RAG_AUTH_MODE", "disabled")
+    local_access = os.environ.get("VOICE_RAG_ALLOW_ANONYMOUS_LOCAL", "false")
+    if local_access not in ("true", "false"):
+        raise ValueError("VOICE_RAG_ALLOW_ANONYMOUS_LOCAL must be true or false")
+    if local_access == "true":
+        if os.environ.get("RUNNING_IN_PRODUCTION") or auth_mode != "disabled":
+            raise ValueError("Local anonymous access cannot be enabled in production or with another auth mode")
+        auth_mode = "local"
+    if auth_mode not in ("disabled", "local", "container_apps"):
+        raise ValueError("Invalid realtime authentication mode")
+    return auth_mode
+
+
 async def create_app():
     if not os.environ.get("RUNNING_IN_PRODUCTION"):
         logger.info("Running in development mode, loading from .env file")
         load_dotenv()
+
+    auth_mode = realtime_auth_mode()
 
     llm_key = os.environ.get("AZURE_OPENAI_API_KEY")
     search_key = os.environ.get("AZURE_SEARCH_API_KEY")
@@ -38,7 +54,9 @@ async def create_app():
         credentials=llm_credential,
         endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         deployment=os.environ["AZURE_OPENAI_REALTIME_DEPLOYMENT"],
-        voice_choice=os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE") or "alloy"
+        voice_choice=os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE") or "alloy",
+        auth_mode=auth_mode,
+        realtime_api=os.environ.get("VOICE_RAG_REALTIME_API_MODE", "preview"),
         )
     rtmt.system_message = """
         You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. 
