@@ -56,14 +56,24 @@ export default function useRealTime({
         : `/realtime`;
 
     const { sendJsonMessage } = useWebSocket(wsEndpoint, {
-        onOpen: () => onWebSocketOpen?.(),
-        onClose: () => onWebSocketClose?.(),
-        onError: event => onWebSocketError?.(event),
+        onOpen: () => {
+            console.log('WebSocket opened - but session not started yet');
+            onWebSocketOpen?.();
+        },
+        onClose: () => {
+            console.log('WebSocket closed');
+            onWebSocketClose?.();
+        },
+        onError: event => {
+            console.error('WebSocket error:', event);
+            onWebSocketError?.(event);
+        },
         onMessage: event => onMessageReceived(event),
-        shouldReconnect: () => true
+        shouldReconnect: () => false // منع إعادة الاتصال التلقائي
     });
 
     const startSession = () => {
+        console.log('Starting realtime session...');
         const command: SessionUpdateCommand = {
             type: "session.update",
             session: {
@@ -79,6 +89,7 @@ export default function useRealTime({
             };
         }
 
+        console.log('Sending session update command:', command);
         sendJsonMessage(command);
     };
 
